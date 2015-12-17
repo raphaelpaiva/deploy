@@ -1,9 +1,9 @@
 #!/usr/bin/python
-from os import *
-
+import os
+import sys
 def read_war_files(path):
     wars = []
-    for file in listdir(path):
+    for file in os.listdir(path):
         if is_war(file):
             wars.append(path + file)
 
@@ -20,7 +20,13 @@ def prepare_deploy_statement(war_file):
     return "deploy " + war_file + " --runtime-name=" + archive_name + " --name=" + deployment_name
 
 def main():
-    path = "/home/raphaelpaiva/Scripts/test/"
+    if len(sys.argv) <= 1:
+        print "Please provide the full path where the war files are located"
+        print "Example:"
+        print "  $ python deploy.py /path/to/deployment/"
+        exit(1)
+
+    path = sys.argv[1]
     wars = read_war_files(path)
 
     for war in wars:
