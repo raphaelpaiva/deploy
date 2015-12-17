@@ -29,8 +29,15 @@ def main():
     path = sys.argv[1]
     wars = read_war_files(path)
 
+    batch = len(wars)
+
+    if  batch > 1:
+        print "batch"
+
     for war in wars:
         print prepare_deploy_statement(war)
 
+    if batch > 1:
+        print "run-batch"
 
 if __name__ == "__main__": main()
