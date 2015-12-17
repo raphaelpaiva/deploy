@@ -19,6 +19,19 @@ def prepare_deploy_statement(war_file):
 
     return "deploy " + war_file + " --runtime-name=" + archive_name + " --name=" + deployment_name
 
+def print_deploy_script(wars):
+
+        batch = len(wars)
+
+        if  batch > 1:
+            print "batch"
+
+        for war in wars:
+            print prepare_deploy_statement(war)
+
+        if batch > 1:
+            print "run-batch"
+
 def main():
     if len(sys.argv) <= 1:
         print "Please provide the full path where the war files are located"
@@ -29,15 +42,6 @@ def main():
     path = sys.argv[1]
     wars = read_war_files(path)
 
-    batch = len(wars)
-
-    if  batch > 1:
-        print "batch"
-
-    for war in wars:
-        print prepare_deploy_statement(war)
-
-    if batch > 1:
-        print "run-batch"
+    print_deploy_script(wars)
 
 if __name__ == "__main__": main()
