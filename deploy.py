@@ -32,12 +32,15 @@ def print_deploy_script(wars):
         if batch > 1:
             print "run-batch"
 
+def usage():
+    print "Please provide the full path where the war files are located"
+    print "Example:"
+    print "  $ python deploy.py /path/to/deployment/"
+    exit(1)
+
 def main():
     if len(sys.argv) <= 1:
-        print "Please provide the full path where the war files are located"
-        print "Example:"
-        print "  $ python deploy.py /path/to/deployment/"
-        exit(1)
+        usage()
 
     path = sys.argv[1]
     wars = read_war_files(path)
