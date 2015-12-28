@@ -35,8 +35,11 @@ def print_deploy_script(wars):
 def usage():
     print "Please provide the full path where the war files are located"
     print "Example:"
-    print "  $ python deploy.py /path/to/deployment/"
+    print "  $ " + sys.argv[0] + " /path/to/deployment/"
     exit(1)
+
+def extract_tag(path):
+    return path.split("/")[-1]
 
 def main():
     if len(sys.argv) <= 1:
@@ -44,6 +47,7 @@ def main():
 
     path = sys.argv[1]
     wars = read_war_files(path)
+    tag = extract_tag(path)
 
     print_deploy_script(wars)
 
