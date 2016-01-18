@@ -34,6 +34,14 @@ def print_deploy_script(wars, tag):
         if batch > 1:
             print "run-batch"
 
+def prepare_undeploy_statement(war_file):
+    war = war_file.split("/")[-1]
+    return "undeploy " + war + " --keep-content"
+
+def print_undeploy_script(wars):
+  for war in wars:
+      print prepare_undeploy_statement(war)
+
 def usage():
     print "Please provide the full path where the war files are located"
     print "Example:"
@@ -54,6 +62,7 @@ def main():
     wars = read_war_files(path)
     tag = extract_tag(path)
 
+    print_undeploy_script(wars)
     print_deploy_script(wars, tag)
 
 if __name__ == "__main__": main()
