@@ -12,14 +12,16 @@ def read_war_files(path):
 def is_war(file):
     return file.endswith('.war')
 
-def prepare_deploy_statement(war_file):
-    tag = "tag"
+def prepare_deploy_statement(war_file, tag=None):
+    if tag == None:
+        tag = "notag"
+
     archive_name = war_file.split('/')[-1]
     deployment_name = archive_name.replace(".war", "") + "-" + tag
 
     return "deploy " + war_file + " --runtime-name=" + archive_name + " --name=" + deployment_name
 
-def print_deploy_script(wars):
+def print_deploy_script(wars, tag):
 
         batch = len(wars)
 
@@ -27,7 +29,7 @@ def print_deploy_script(wars):
             print "batch"
 
         for war in wars:
-            print prepare_deploy_statement(war)
+            print prepare_deploy_statement(war, tag)
 
         if batch > 1:
             print "run-batch"
@@ -39,6 +41,9 @@ def usage():
     exit(1)
 
 def extract_tag(path):
+    if path.endswith("/"):
+        path = path[:-1]
+
     return path.split("/")[-1]
 
 def main():
@@ -49,6 +54,6 @@ def main():
     wars = read_war_files(path)
     tag = extract_tag(path)
 
-    print_deploy_script(wars)
+    print_deploy_script(wars, tag)
 
 if __name__ == "__main__": main()
