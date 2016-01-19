@@ -54,9 +54,22 @@ def extract_tag(path):
 
     return path.split("/")[-1]
 
-def main():
+def error(message=None, code=1):
+    if message != None:
+        print "[ERROR]: " + message
+
+    usage()
+    exit(code)
+
+def parse_args():
     if len(sys.argv) <= 1:
-        usage()
+        error()
+
+    if not os.path.isdir(sys.argv[1]):
+        error(sys.argv[1] + " is not a directory.")
+
+def main():
+    parse_args()
 
     path = sys.argv[1]
     wars = read_war_files(path)
