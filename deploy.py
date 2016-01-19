@@ -1,24 +1,23 @@
 #!/usr/bin/python
 import os
 import sys
+import argparse
 import cli_output
 
 def main():
-    parse_args()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("path", help="the path where the .war packages are stored")
+    parser.add_argument("--domain",
+                        help="prepare statements for domain mode, instead of standalone",
+                        action="store_true")
+    args = parser.parse_args()
 
-    path = os.path.abspath(sys.argv[1]) + "/"
+    path = os.path.abspath(args.path) + "/"
     wars = read_war_files(path)
     tag = extract_tag(path)
 
     cli_output.print_undeploy_script(wars)
     cli_output.print_deploy_script(wars, tag)
-
-def parse_args():
-    if len(sys.argv) <= 1:
-        error()
-
-    if not os.path.isdir(sys.argv[1]):
-        error(sys.argv[1] + " is not a directory.")
 
 def usage():
     print "Please provide the full path where the war files are located"
