@@ -1,5 +1,6 @@
 #!/usr/bin/python
 import unittest
+import cli_output
 import deploy
 
 class TestDeploy(unittest.TestCase):
@@ -10,7 +11,7 @@ class TestDeploy(unittest.TestCase):
       self.assertFalse(deploy.is_war('aaa'))
 
   def test_prepare_deploy_statement(self):
-      actual_statement = deploy.prepare_deploy_statement('/tmp/deploy/archive.war')
+      actual_statement = cli_output.prepare_deploy_statement('/tmp/deploy/archive.war')
       expected_statement = 'deploy /tmp/deploy/archive.war --runtime-name=archive.war --name=archive-notag'
       self.assertEqual(actual_statement, expected_statement)
 

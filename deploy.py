@@ -1,6 +1,38 @@
 #!/usr/bin/python
 import os
 import sys
+import cli_output
+
+def main():
+    parse_args()
+
+    path = sys.argv[1]
+    wars = read_war_files(path)
+    tag = extract_tag(path)
+
+    cli_output.print_undeploy_script(wars)
+    cli_output.print_deploy_script(wars, tag)
+
+def parse_args():
+    if len(sys.argv) <= 1:
+        error()
+
+    if not os.path.isdir(sys.argv[1]):
+        error(sys.argv[1] + " is not a directory.")
+
+def usage():
+    print "Please provide the full path where the war files are located"
+    print "Example:"
+    print "  $ " + sys.argv[0] + " /path/to/deployment/"
+    exit(1)
+
+def error(message=None, code=1):
+    if message != None:
+        print "[ERROR]: " + message
+
+    usage()
+    exit(code)
+
 def read_war_files(path):
     wars = []
     for file in os.listdir(path):
@@ -12,70 +44,10 @@ def read_war_files(path):
 def is_war(file):
     return file.endswith('.war')
 
-def prepare_deploy_statement(war_file, tag=None):
-    if tag == None:
-        tag = "notag"
-
-    archive_name = war_file.split('/')[-1]
-    deployment_name = archive_name.replace(".war", "") + "-" + tag
-
-    return "deploy " + war_file + " --runtime-name=" + archive_name + " --name=" + deployment_name
-
-def print_deploy_script(wars, tag):
-
-        batch = len(wars)
-
-        if  batch > 1:
-            print "batch"
-
-        for war in wars:
-            print prepare_deploy_statement(war, tag)
-
-        if batch > 1:
-            print "run-batch"
-
-def prepare_undeploy_statement(war_file):
-    war = war_file.split("/")[-1]
-    return "undeploy " + war + " --keep-content"
-
-def print_undeploy_script(wars):
-  for war in wars:
-      print prepare_undeploy_statement(war)
-
-def usage():
-    print "Please provide the full path where the war files are located"
-    print "Example:"
-    print "  $ " + sys.argv[0] + " /path/to/deployment/"
-    exit(1)
-
 def extract_tag(path):
     if path.endswith("/"):
         path = path[:-1]
 
     return path.split("/")[-1]
-
-def error(message=None, code=1):
-    if message != None:
-        print "[ERROR]: " + message
-
-    usage()
-    exit(code)
-
-def parse_args():
-    if len(sys.argv) <= 1:
-        error()
-
-    if not os.path.isdir(sys.argv[1]):
-        error(sys.argv[1] + " is not a directory.")
-
-def main():
-    parse_args()
-
-    path = sys.argv[1]
-    wars = read_war_files(path)
-    tag = extract_tag(path)
-
-    print_undeploy_script(wars)
-    print_deploy_script(wars, tag)
 
 if __name__ == "__main__": main()
