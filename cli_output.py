@@ -22,13 +22,14 @@ def print_deploy_script(wars, tag):
     if batch > 1:
         print "run-batch"
 
-def prepare_undeploy_statement(war_file):
+def prepare_undeploy_statement(war_file, undeploy_tag):
     war = war_file.split("/")[-1]
-    return "undeploy " + war + " --keep-content"
+    deployment_name = war.replace(".war", "") + "-" + undeploy_tag
+    return "undeploy " + deployment_name + " --keep-content"
 
 def print_undeploy_pattern(undeploy_pattern):
     print "undeploy --name=" + undeploy_pattern + " --keep-content"
 
-def print_undeploy_script(wars):
+def print_undeploy_script(wars, undeploy_tag):
     for war in wars:
-        print prepare_undeploy_statement(war)
+        print prepare_undeploy_statement(war, undeploy_tag)
