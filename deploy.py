@@ -5,17 +5,7 @@ import argparse
 import cli_output
 
 def main():
-    parser = argparse.ArgumentParser(description="Generates jboss-cli [un]deploy commands which you can pipe through jboss-cli script.")
-    parser.add_argument("path", help="the path where the .war packages are stored")
-    parser.add_argument("--skip-undeploy",
-                        help="do not generate undeploy commands",
-                        action="store_true")
-    parser.add_argument("--undeploy-pattern", help="specify a regex pattern for the undeploy cammand. This implies --skip-undeploy.")
-    parser.add_argument("--domain",
-                        help="prepare statements for domain mode, instead of standalone",
-                        action="store_true")
-    args = parser.parse_args()
-
+    args = parse_args()
     path = os.path.abspath(args.path) + "/"
     domain = args.domain
     undeploy_pattern = args.undeploy_pattern
@@ -35,6 +25,19 @@ def main():
         cli_output.print_undeploy_pattern(undeploy_pattern)
 
     cli_output.print_deploy_script(wars, tag)
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="Generates [un]deploy commands which you can pipe through jboss-cli script.")
+    parser.add_argument("path", help="the path where the .war packages are stored")
+    parser.add_argument("--skip-undeploy",
+                        help="do not generate undeploy commands",
+                        action="store_true")
+    parser.add_argument("--undeploy-pattern", help="specify a regex pattern for the undeploy cammand. This implies --skip-undeploy.")
+    parser.add_argument("--domain",
+                        help="prepare statements for domain mode, instead of standalone",
+                        action="store_true")
+    return parser.parse_args()
+
 
 def usage():
     print "Please provide the full path where the war files are located"
