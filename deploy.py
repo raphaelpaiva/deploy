@@ -10,6 +10,7 @@ def main():
     parser.add_argument("--skip-undeploy",
                         help="do not generate undeploy commands",
                         action="store_true")
+    parser.add_argument("--undeploy-pattern", help="specify a regex pattern for the undeploy cammand. This implies --skip-undeploy.")
     parser.add_argument("--domain",
                         help="prepare statements for domain mode, instead of standalone",
                         action="store_true")
@@ -17,13 +18,22 @@ def main():
 
     path = os.path.abspath(args.path) + "/"
     domain = args.domain
-    skip_undeploy = args.skip_undeploy
+    undeploy_pattern = args.undeploy_pattern
+
+    if undeploy_pattern:
+        skip_undeploy = True
+    else:
+        skip_undeploy = args.skip_undeploy
+
     wars = read_war_files(path)
     tag = extract_tag(path)
 
     if not skip_undeploy:
         cli_output.print_undeploy_script(wars)
-    
+
+    if undeploy_pattern:
+        cli_output.print_undeploy_pattern(undeploy_pattern)
+
     cli_output.print_deploy_script(wars, tag)
 
 def usage():
