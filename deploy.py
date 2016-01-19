@@ -5,18 +5,25 @@ import argparse
 import cli_output
 
 def main():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="Generates jboss-cli [un]deploy commands which you can pipe through jboss-cli script.")
     parser.add_argument("path", help="the path where the .war packages are stored")
+    parser.add_argument("--skip-undeploy",
+                        help="do not generate undeploy commands",
+                        action="store_true")
     parser.add_argument("--domain",
                         help="prepare statements for domain mode, instead of standalone",
                         action="store_true")
     args = parser.parse_args()
 
     path = os.path.abspath(args.path) + "/"
+    domain = args.domain
+    skip_undeploy = args.skip_undeploy
     wars = read_war_files(path)
     tag = extract_tag(path)
 
-    cli_output.print_undeploy_script(wars)
+    if not skip_undeploy:
+        cli_output.print_undeploy_script(wars)
+    
     cli_output.print_deploy_script(wars, tag)
 
 def usage():
