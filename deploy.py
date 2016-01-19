@@ -38,20 +38,6 @@ def parse_args():
                         action="store_true")
     return parser.parse_args()
 
-
-def usage():
-    print "Please provide the full path where the war files are located"
-    print "Example:"
-    print "  $ " + sys.argv[0] + " /path/to/deployment/"
-    exit(1)
-
-def error(message=None, code=1):
-    if message != None:
-        print "[ERROR]: " + message
-
-    usage()
-    exit(code)
-
 def read_war_files(path):
     wars = []
     for file in os.listdir(path):
