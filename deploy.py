@@ -6,7 +6,7 @@ import cli_output
 def main():
     parse_args()
 
-    path = sys.argv[1]
+    path = os.path.abspath(sys.argv[1]) + "/"
     wars = read_war_files(path)
     tag = extract_tag(path)
 
