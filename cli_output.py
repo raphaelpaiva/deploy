@@ -5,7 +5,7 @@ def prepare_deploy_statement(war_file, tag=None):
     if tag == None:
         tag = "notag"
 
-    archive_name = war_file.split('/')[-1]
+    archive_name = war_file.split(os.sep)[-1]
     deployment_name = archive_name.replace(".war", "") + "-" + tag
 
     return "deploy " + war_file + " --runtime-name=" + archive_name + " --name=" + deployment_name
@@ -23,7 +23,7 @@ def print_deploy_script(wars, tag):
         print "run-batch"
 
 def prepare_undeploy_statement(war_file, undeploy_tag):
-    war = war_file.split("/")[-1]
+    war = war_file.split(os.sep)[-1]
     deployment_name = war.replace(".war", "") + "-" + undeploy_tag
     return "undeploy " + deployment_name + " --keep-content"
 
@@ -33,3 +33,10 @@ def print_undeploy_pattern(undeploy_pattern):
 def print_undeploy_script(wars, undeploy_tag):
     for war in wars:
         print prepare_undeploy_statement(war, undeploy_tag)
+
+def print_interpolated_deploy(wars, tag, undeploy_tag):
+    for war in wars:
+        print "batch"
+        print prepare_undeploy_statement(war, undeploy_tag)
+        print prepare_deploy_statement(war, tag)
+        print "run-batch"
