@@ -3,6 +3,7 @@ import os
 import sys
 import argparse
 import cli_output
+import jbosscli.jbosscli as jbosscli
 
 def main():
     args = parse_args()
@@ -12,19 +13,16 @@ def main():
     skip_undeploy = True if undeploy_pattern else args.skip_undeploy
     undeploy_tag = args.undeploy_tag if args.undeploy_tag else ".war"
 
-    wars = read_war_files(path)
     tag = extract_tag(path)
+    wars = read_war_files(path, tag)
 
-    if args.interpolated:
-        cli_output.print_interpolated_deploy(wars, tag, undeploy_pattern if undeploy_pattern else undeploy_tag)
-    else:
-        if not skip_undeploy:
-            cli_output.print_undeploy_script(wars, undeploy_tag)
+    if not skip_undeploy:
+        cli_output.print_undeploy_script(wars, undeploy_tag)
 
-        if undeploy_pattern:
-            cli_output.print_undeploy_pattern(undeploy_pattern)
+    if undeploy_pattern:
+        cli_output.print_undeploy_pattern(undeploy_pattern)
 
-        cli_output.print_deploy_script(wars, tag)
+    cli_output.print_deploy_script(wars)
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Generates [un]deploy commands which you can pipe through jboss-cli script.")
@@ -44,17 +42,18 @@ def parse_args():
     parser.add_argument("--domain",
                         help="prepare statements for domain mode, instead of standalone",
                         action="store_true")
-    parser.add_argument("--interpolated",
-                        help="Undeploy and deploy in pairs",
-                        action="store_true")
 
     return parser.parse_args()
 
-def read_war_files(path):
+def read_war_files(path, tag):
     wars = []
     for file in os.listdir(path):
         if is_war(file):
-            wars.append(path + file)
+            runtime_name = file.split(os.sep)[-1]
+            name = runtime_name.replace(".war", "") + "-" + tag
+            enabled = False
+            deployment = jbosscli.Deployment(name, runtime_name, enabled, path=file)
+            wars.append(deployment)
 
     return wars
 
