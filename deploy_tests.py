@@ -26,7 +26,7 @@ class TestDeploy(unittest.TestCase):
 
   def test_prepare_undeploy_statement(self):
       deployment = jbosscli.Deployment("archive-tag", "archive.war")
-      self.assertEqual(cli_output.prepare_undeploy_statement(deployment), "undeploy archive.war --keep-content")
+      self.assertEqual(cli_output.prepare_undeploy_statement(deployment), "undeploy archive-tag --keep-content")
 
   def test_extract_tag_fullPath_shouldReturnLastDir(self):
       path = os.path.join("/tmp", "deploy", "5.0.0-alfa-24")
