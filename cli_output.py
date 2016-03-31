@@ -8,16 +8,9 @@ def prepare_deploy_statement(deployment):
     return deployment_statement.format(deployment.path, deployment.runtime_name, deployment.name, server_group_statement)
 
 def print_deploy_script(wars):
-    batch = len(wars)
-
-    if  batch > 1:
-        print "batch"
 
     for war in wars:
         print prepare_deploy_statement(war)
-
-    if batch > 1:
-        print "run-batch"
 
 def prepare_undeploy_statement(deployment, undeploy_tag=""):
     undeploy_statement = "undeploy {0} --keep-content{1}"
