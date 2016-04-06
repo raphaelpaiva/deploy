@@ -10,7 +10,7 @@ def main():
     path = os.path.abspath(args.path) + os.sep
     undeploy_pattern = args.undeploy_pattern
     skip_undeploy = True if undeploy_pattern else args.skip_undeploy
-    undeploy_tag = args.undeploy_tag if args.undeploy_tag else ".war"
+    undeploy_tag = args.undeploy_tag
 
     controller = initialize_controller(args)
 
@@ -21,7 +21,7 @@ def main():
 
     if controller:
         enabled_deployments = fetch_enabled_deployments(controller, wars)
-        cli_output.print_undeploy_script(enabled_deployments, "")
+        cli_output.print_undeploy_script(enabled_deployments)
     else:
         if not skip_undeploy:
             cli_output.print_undeploy_script(wars, undeploy_tag)

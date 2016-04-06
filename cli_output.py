@@ -12,15 +12,17 @@ def print_deploy_script(wars):
     for war in wars:
         print prepare_deploy_statement(war)
 
-def prepare_undeploy_statement(deployment, undeploy_tag=""):
+def prepare_undeploy_statement(deployment, undeploy_tag=None):
     undeploy_statement = "undeploy {0} --keep-content{1}"
     server_group_statement = " --all-relevant-server-groups" if deployment.server_group else ""
 
-    return undeploy_statement.format(deployment.name, server_group_statement)
+    name = deployment.name if not undeploy_tag else deployment.runtime_name.replace(".war", "") + "-" + undeploy_tag
+
+    return undeploy_statement.format(name, server_group_statement)
 
 def print_undeploy_pattern(undeploy_pattern):
     print "undeploy --name=" + undeploy_pattern + " --keep-content"
 
-def print_undeploy_script(wars, undeploy_tag):
+def print_undeploy_script(wars, undeploy_tag=None):
     for war in wars:
         print prepare_undeploy_statement(war, undeploy_tag)
