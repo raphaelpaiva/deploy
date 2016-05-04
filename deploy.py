@@ -15,26 +15,26 @@ def main():
     controller = initialize_controller(args)
 
     tag = extract_tag(path)
-    wars = read_war_files(path, tag)
+    archives = read_archive_files(path, tag)
 
     enabled_deployments = []
 
     if controller:
-        enabled_deployments = fetch_enabled_deployments(controller, wars)
+        enabled_deployments = fetch_enabled_deployments(controller, archives)
         cli_output.print_undeploy_script(enabled_deployments)
     else:
         if not skip_undeploy:
-            cli_output.print_undeploy_script(wars, undeploy_tag)
+            cli_output.print_undeploy_script(archives, undeploy_tag)
 
         if undeploy_pattern:
             cli_output.print_undeploy_pattern(undeploy_pattern)
 
-    cli_output.print_deploy_script(wars)
+    cli_output.print_deploy_script(archives)
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Generates [un]deploy commands which you can pipe through jboss-cli script.")
 
-    parser.add_argument("path", help="the path where the .war packages are stored")
+    parser.add_argument("path", help="the path where the archive (.war, .jar) packages are stored")
 
     parser.add_argument("--skip-undeploy",
                         help="do not generate undeploy commands",
@@ -63,17 +63,17 @@ def initialize_controller(args):
         print e
         return None
 
-def read_war_files(path, tag):
-    wars = []
+def read_archive_files(path, tag):
+    archives = []
     for file in os.listdir(path):
         if is_archive(file):
             runtime_name = file.split(os.sep)[-1]
             name = runtime_name.replace(".war", "").replace(".jar", "") + "-" + tag
             enabled = False
             deployment = jbosscli.Deployment(name, runtime_name, enabled, path=path + file)
-            wars.append(deployment)
+            archives.append(deployment)
 
-    return wars
+    return archives
 
 def is_archive(file):
     return file.endswith('.war') or file.endswith('.jar')
@@ -84,12 +84,12 @@ def extract_tag(path):
 
     return path.split(os.sep)[-1]
 
-def fetch_enabled_deployments(controller, wars):
+def fetch_enabled_deployments(controller, archives):
     deployments = controller.get_deployments()
 
     runtime_names = {}
-    for war in wars:
-        runtime_names[war.runtime_name] = war
+    for archive in archives:
+        runtime_names[archive.runtime_name] = archive
 
     enabled_deployments = []
     for deployment in deployments:

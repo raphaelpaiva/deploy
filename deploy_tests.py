@@ -71,13 +71,13 @@ class TestDeploy(unittest.TestCase):
       expected_tag="5.0.0-alfa-24"
       self.assertEqual(deploy.extract_tag(path), expected_tag)
 
-  def test_read_war_files(self):
+  def test_read_archive_files(self):
       files = ["aaa.war", "bbb.war", "ccc.txt", "ddd.jar"]
       tag = "5.0.0.1"
       path = "/tmp/deploy/" + tag
       os.listdir = MagicMock(return_value=files)
 
-      deployments = deploy.read_war_files(path, tag)
+      deployments = deploy.read_archive_files(path, tag)
 
       self.assertEqual(len(deployments), 3)
       self.assertEqual(deployments[0].name, "aaa-5.0.0.1")

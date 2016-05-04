@@ -22,6 +22,6 @@ def prepare_undeploy_statement(deployment, undeploy_tag=None):
 def print_undeploy_pattern(undeploy_pattern):
     print "undeploy --name=" + undeploy_pattern + " --keep-content"
 
-def print_undeploy_script(wars, undeploy_tag=None):
-    for war in wars:
-        print prepare_undeploy_statement(war, undeploy_tag)
+def print_undeploy_script(archives, undeploy_tag=None):
+    for archive in archives:
+        print prepare_undeploy_statement(archive, undeploy_tag)
