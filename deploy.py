@@ -66,17 +66,17 @@ def initialize_controller(args):
 def read_war_files(path, tag):
     wars = []
     for file in os.listdir(path):
-        if is_war(file):
+        if is_archive(file):
             runtime_name = file.split(os.sep)[-1]
-            name = runtime_name.replace(".war", "") + "-" + tag
+            name = runtime_name.replace(".war", "").replace(".jar", "") + "-" + tag
             enabled = False
             deployment = jbosscli.Deployment(name, runtime_name, enabled, path=path + file)
             wars.append(deployment)
 
     return wars
 
-def is_war(file):
-    return file.endswith('.war')
+def is_archive(file):
+    return file.endswith('.war') or file.endswith('.jar')
 
 def extract_tag(path):
     if path.endswith(os.sep):

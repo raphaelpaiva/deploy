@@ -7,16 +7,15 @@ def prepare_deploy_statement(deployment):
 
     return deployment_statement.format(deployment.path, deployment.runtime_name, deployment.name, server_group_statement)
 
-def print_deploy_script(wars):
-
-    for war in wars:
-        print prepare_deploy_statement(war)
+def print_deploy_script(archives):
+    for archive in archives:
+        print prepare_deploy_statement(archive)
 
 def prepare_undeploy_statement(deployment, undeploy_tag=None):
     undeploy_statement = "undeploy {0} --keep-content{1}"
     server_group_statement = " --all-relevant-server-groups" if deployment.server_group else ""
 
-    name = deployment.name if not undeploy_tag else deployment.runtime_name.replace(".war", "") + "-" + undeploy_tag
+    name = deployment.name if not undeploy_tag else deployment.runtime_name.replace(".war", "").replace(".jar", "") + "-" + undeploy_tag
 
     return undeploy_statement.format(name, server_group_statement)
 
