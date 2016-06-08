@@ -85,7 +85,7 @@ def extract_tag(path):
     return path.split(os.sep)[-1]
 
 def fetch_enabled_deployments(controller, archives):
-    deployments = controller.get_deployments()
+    deployments = controller.get_assigned_deployments()
 
     runtime_names = {}
     for archive in archives:
