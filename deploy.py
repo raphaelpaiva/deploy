@@ -4,6 +4,7 @@ import tempfile
 import argparse
 import cli_output
 import jbosscli.jbosscli as jbosscli
+import time
 
 def main():
     args = parse_args()
@@ -22,6 +23,7 @@ def main():
 
     if controller:
         enabled_deployments = fetch_enabled_deployments(controller, archives)
+        persist_rollback_info(enabled_deployments)
         cli_output.print_undeploy_script(enabled_deployments)
     else:
         if not skip_undeploy:
@@ -124,5 +126,19 @@ def fetch_enabled_deployments(controller, archives):
             runtime_names[deployment.runtime_name].server_group = deployment.server_group
 
     return enabled_deployments
+
+def persist_rollback_info(deployments):
+    rollback_info_file = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "rollback-info_" + str(int(round(time.time() * 1000)))
+    deployment_line_template = "{0} {1} {2}\n"
+    rollback_info = ""
+
+    print "# Rollback information saved in " + rollback_info_file
+
+    for deployment in deployments:
+        line = deployment_line_template.format(deployment.name, deployment.runtime_name, deployment.server_group)
+        rollback_info += line
+
+    with open(rollback_info_file, "w") as f:
+        f.write(rollback_info)
 
 if __name__ == "__main__": main()
