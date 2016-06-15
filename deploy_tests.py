@@ -89,5 +89,29 @@ class TestDeploy(unittest.TestCase):
       self.assertEqual(deployments[2].name, "ddd-5.0.0.1")
       self.assertEqual(deployments[2].runtime_name, "ddd.jar")
 
+  def test_get_latest_rollback_file_validFileList_shouldReturnLatestTimeStamp(self):
+      files = "rollback-info_1465588121140 rollback-info_1465588289292 rollback-info_1465588416224 rollback-info_1465590073564".split()
+
+      expected_latest = "rollback-info_1465590073564"
+      actual_latest = deploy.get_latest_rollback_file(files)
+
+      self.assertEqual(actual_latest, expected_latest)
+
+  def test_get_latest_rollback_file_emptyFileList_shouldReturnNone(self):
+      files = []
+
+      expected_latest = None
+      actual_latest = deploy.get_latest_rollback_file(files)
+
+      self.assertEqual(actual_latest, expected_latest)
+
+  def test_get_latest_rollback_file_NullFileList_shouldReturnNone(self):
+      files = None
+
+      expected_latest = None
+      actual_latest = deploy.get_latest_rollback_file(files)
+
+      self.assertEqual(actual_latest, expected_latest)
+
 if __name__ == '__main__':
     unittest.main()

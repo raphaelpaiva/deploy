@@ -5,7 +5,9 @@ def prepare_deploy_statement(deployment):
     deployment_statement = "deploy {0} --runtime-name={1} --name={2}{3}"
     server_group_statement = "" if not deployment.server_group else " --server-groups={0}".format(deployment.server_group)
 
-    return deployment_statement.format(deployment.path, deployment.runtime_name, deployment.name, server_group_statement)
+    deployment_path = deployment.path if deployment.path else ""
+
+    return deployment_statement.format(deployment_path, deployment.runtime_name, deployment.name, server_group_statement)
 
 def print_deploy_script(archives):
     for archive in archives:

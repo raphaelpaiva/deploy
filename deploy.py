@@ -1,5 +1,6 @@
 #!/usr/bin/python
 import os
+import glob
 import tempfile
 import argparse
 import cli_output
@@ -16,14 +17,24 @@ def main():
 
     controller = initialize_controller(args)
 
+    if not controller and args.rollback:
+        print "# Cannot communicate with the specified controller\n# Rollback will not occour"
+        exit(1)
+
     tag = extract_tag(path)
-    archives = read_archive_files(path, tag)
+
+    archives = []
+    if not args.rollback:
+        archives = read_archive_files(path, tag)
+    else:
+        archives = read_rollback_info()
 
     enabled_deployments = []
 
     if controller:
         enabled_deployments = fetch_enabled_deployments(controller, archives)
-        persist_rollback_info(enabled_deployments)
+        if not args.rollback:
+            persist_rollback_info(enabled_deployments)
         cli_output.print_undeploy_script(enabled_deployments)
     else:
         if not skip_undeploy:
@@ -66,6 +77,10 @@ def parse_args():
     parser.add_argument("--server-group-mapping-file",
                         help="A file containing a runtime-name=server-group mapping. Defaults to /tmp/server-group-mapping.properties",
                         default=default_server_group_mapping_file)
+
+    parser.add_argument("--rollback",
+                        help="Rollback to a previous deployment. This depends on having a deployment-info file.",
+                        action="store_true")
 
     return parser.parse_args()
 
@@ -140,5 +155,38 @@ def persist_rollback_info(deployments):
 
     with open(rollback_info_file, "w") as f:
         f.write(rollback_info)
+
+def get_latest_rollback_file(files):
+    if not files:
+        return None
+    timestamps = sorted([int(x.split("_")[1]) for x in files], reverse=True)
+    latest = timestamps[0]
+    return "rollback-info_" + str(latest)
+
+def read_rollback_info():
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    files = list_rollback_files(current_dir)
+
+    rollback_filename = get_latest_rollback_file(files)
+
+    if not rollback_filename:
+        print "# Could not find any rollback information on directory " + current_dir
+        exit(2)
+
+    rollback_file_path = current_dir + os.sep + rollback_filename
+    print "# Using rollback information from " + rollback_file_path
+
+    archives = []
+    with open(rollback_file_path) as f:
+        for line in f:
+            (name, runtime_name, server_group) = line.split()
+            archives.append(jbosscli.Deployment(name, runtime_name, server_group=server_group))
+
+    return archives
+
+def list_rollback_files(current_dir):
+    rollback_files_pattern = current_dir + os.sep + "rollback-info_*"
+
+    return glob.glob(rollback_files_pattern)
 
 if __name__ == "__main__": main()
