@@ -143,6 +143,9 @@ def fetch_enabled_deployments(controller, archives):
     return enabled_deployments
 
 def persist_rollback_info(deployments):
+    if not deployments:
+        return
+
     rollback_info_file = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "rollback-info_" + str(int(round(time.time() * 1000)))
     deployment_line_template = "{0} {1} {2}\n"
     rollback_info = ""
@@ -153,8 +156,11 @@ def persist_rollback_info(deployments):
         line = deployment_line_template.format(deployment.name, deployment.runtime_name, deployment.server_group)
         rollback_info += line
 
-    with open(rollback_info_file, "w") as f:
-        f.write(rollback_info)
+    write_to_file(rollback_info_file, rollback_info)
+
+def write_to_file(file, content):
+    with open(file, "w") as f:
+        f.write(content)
 
 def get_latest_rollback_file(files):
     if not files:

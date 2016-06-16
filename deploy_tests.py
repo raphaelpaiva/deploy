@@ -113,5 +113,29 @@ class TestDeploy(unittest.TestCase):
 
       self.assertEqual(actual_latest, expected_latest)
 
+  def test_persist_rollback_info_emptyDeploymentList_shouldNotWriteFile(self):
+      deployments = []
+      deploy.write_to_file = MagicMock()
+
+      deploy.persist_rollback_info(deployments)
+
+      deploy.write_to_file.assert_not_called()
+
+  def test_persist_rollback_info_NullDeploymentList_shouldNotWriteFile(self):
+      deployments = None
+      deploy.write_to_file = MagicMock()
+
+      deploy.persist_rollback_info(deployments)
+
+      deploy.write_to_file.assert_not_called()
+
+  def test_persist_rollback_info_NullDeploymentList_shouldNotWriteFile(self):
+      deployments = None
+      deploy.write_to_file = MagicMock()
+
+      deploy.persist_rollback_info(deployments)
+
+      deploy.write_to_file.assert_not_called()
+
 if __name__ == '__main__':
     unittest.main()
