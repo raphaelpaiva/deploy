@@ -85,6 +85,7 @@ def parse_args():
     return parser.parse_args()
 
 def initialize_controller(args):
+    """Try to instantiate and return the controller object. In case of errors, print it and return None."""
     try:
         return jbosscli.Jbosscli(args.controller, args.auth)
     except Exception as e:
@@ -92,6 +93,7 @@ def initialize_controller(args):
         return None
 
 def read_archive_files(path, tag):
+    """Scan path looking for archive files. Return a list of archives with tag applied to their names. runtime_name remains as the filename."""
     archives = []
     for file in os.listdir(path):
         if is_archive(file):
@@ -104,15 +106,38 @@ def read_archive_files(path, tag):
     return archives
 
 def is_archive(file):
+    """Return true if file name ends with .war or .jar"""
     return file.endswith('.war') or file.endswith('.jar')
 
 def extract_tag(path):
+    """Extract the name of the directory where the deployments are placed.
+
+    Arguments:
+    path -- the path to extract the name from.
+
+    This simply reads the leaf dir in a path.
+    "/path/to/deployment" returns "deployment"
+    "../relative/path/" returns "path"
+    "abc" returns "abc"
+    """
     if path.endswith(os.sep):
         path = path[:-1]
 
     return path.split(os.sep)[-1]
 
 def read_server_group_mapping(mapping_file):
+    """Given a mapping file path, read it and return a dict with its contents.
+
+    Arguments:
+    mapping_file -- the path to the mapping file (e.g. /tmp/mapping.properties)
+
+    The mapping file name is not relevant.
+    The content of the file should be in the format runtime_name=server_group.
+    One per line, just like a java properties file.
+    E.g.:
+    app1=cluster_group
+    app2=web_group
+    """
     mapping = {}
     if os.path.isfile(mapping_file):
         with open(mapping_file) as f:
@@ -122,11 +147,23 @@ def read_server_group_mapping(mapping_file):
     return mapping
 
 def map_server_groups(archives, mapping):
+    """Given the archives and a server group mapping dict, update the archive's server_group property."""
     for archive in archives:
         if archive.server_group is None and archive.runtime_name in mapping:
             archive.server_group = jbosscli.ServerGroup(mapping[archive.runtime_name], None)
 
 def fetch_enabled_deployments(controller, archives):
+    """Fetch a list of enabled deployments with the same runtime name as the archives to deploy.
+
+    Arguments:
+    controller -- the controller to fetch the deployments from
+    archives   -- the archives to be deployed
+
+    This function updates the archives with fresh information from the controller,
+    such as the server group and if it is enabled or not.
+
+    It is mainly used to provide information to the undeploy script generation.
+    """
     deployments = controller.get_assigned_deployments()
 
     runtime_names = {}
@@ -143,6 +180,7 @@ def fetch_enabled_deployments(controller, archives):
     return enabled_deployments
 
 def persist_rollback_info(deployments):
+    """Write name, runtime_name and server group of all enabled deployments to be replaced to a file named rollback-info_<timestamp>."""
     if not deployments:
         return
 
@@ -159,10 +197,12 @@ def persist_rollback_info(deployments):
     write_to_file(rollback_info_file, rollback_info)
 
 def write_to_file(file, content):
+    """Write content to file."""
     with open(file, "w") as f:
         f.write(content)
 
 def get_latest_rollback_file(files):
+    """Given a list of rollback file names, return the latest file name based on the name's timestamp."""
     if not files:
         return None
     timestamps = sorted([int(x.split("_")[1]) for x in files], reverse=True)
@@ -170,6 +210,7 @@ def get_latest_rollback_file(files):
     return "rollback-info_" + str(latest)
 
 def read_rollback_info():
+    """Search the current directory for the latest rollback-info_* file. Return the content as a deployment list."""
     current_dir = os.path.dirname(os.path.abspath(__file__))
     files = list_rollback_files(current_dir)
 
@@ -190,8 +231,13 @@ def read_rollback_info():
 
     return archives
 
-def list_rollback_files(current_dir):
-    rollback_files_pattern = current_dir + os.sep + "rollback-info_*"
+def list_rollback_files(directory):
+    """List files in the directory whose name starts with rollback-info_. Return a list with the filenames.
+
+    Arguments:
+    directory -- the directory to search the files
+    """
+    rollback_files_pattern = directory + os.sep + "rollback-info_*"
 
     return glob.glob(rollback_files_pattern)
 
