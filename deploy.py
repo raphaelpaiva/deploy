@@ -54,7 +54,7 @@ def parse_args():
 
     parser = argparse.ArgumentParser(description="Generates [un]deploy commands which you can pipe through jboss-cli script.")
 
-    parser.add_argument("path", help="the path where the archive (.war, .jar) packages are stored")
+    parser.add_argument("path", help="the path where the archive (.ear, .war, .jar) packages are stored")
 
     parser.add_argument("--skip-undeploy",
                         help="do not generate undeploy commands",
@@ -98,7 +98,7 @@ def read_archive_files(path, tag):
     for file in os.listdir(path):
         if is_archive(file):
             runtime_name = file.split(os.sep)[-1]
-            name = runtime_name.replace(".war", "").replace(".jar", "") + "-" + tag
+            name = runtime_name.replace(".ear", "").replace(".war", "").replace(".jar", "") + "-" + tag
             enabled = False
             deployment = jbosscli.Deployment(name, runtime_name, enabled, path=path + file)
             archives.append(deployment)
@@ -106,8 +106,8 @@ def read_archive_files(path, tag):
     return archives
 
 def is_archive(file):
-    """Return true if file name ends with .war or .jar"""
-    return file.endswith('.war') or file.endswith('.jar')
+    """Return true if file name ends with .ear, .war or .jar"""
+    return file.endswith('.ear') or file.endswith('.war') or file.endswith('.jar')
 
 def extract_tag(path):
     """Extract the name of the directory where the deployments are placed.
