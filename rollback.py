@@ -20,7 +20,7 @@ def persist_rollback_info(deployments):
 
     write_to_file(rollback_info_file, rollback_info)
 
-def write_to_file(file, content):
+def write_to_file(file, content): #pragma: no cover
     """Write content to file."""
     with open(file, "w") as f:
         f.write(content)
@@ -48,12 +48,19 @@ def read_rollback_info():
     print "# Using rollback information from " + rollback_file_path
 
     archives = []
-    with open(rollback_file_path) as f:
-        for line in f:
-            (name, runtime_name, server_group) = line.split()
-            archives.append(jbosscli.Deployment(name, runtime_name, server_group=server_group))
+    lines = read_from_file(rollback_file_path)
+    for line in lines:
+        (name, runtime_name, server_group) = line.split()
+        archives.append(jbosscli.Deployment(name, runtime_name, server_group=server_group))
 
     return archives
+
+def read_from_file(path): #pragma: no cover
+    lines = []
+    with open(path) as f:
+        lines = f.readlines()
+
+    return lines
 
 def list_rollback_files(directory):
     """List files in the directory whose name starts with rollback-info_. Return a list with the filenames.
