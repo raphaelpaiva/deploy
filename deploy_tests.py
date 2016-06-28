@@ -89,53 +89,5 @@ class TestDeploy(unittest.TestCase):
       self.assertEqual(deployments[2].name, "ddd-5.0.0.1")
       self.assertEqual(deployments[2].runtime_name, "ddd.jar")
 
-  def test_get_latest_rollback_file_validFileList_shouldReturnLatestTimeStamp(self):
-      files = "rollback-info_1465588121140 rollback-info_1465588289292 rollback-info_1465588416224 rollback-info_1465590073564".split()
-
-      expected_latest = "rollback-info_1465590073564"
-      actual_latest = deploy.get_latest_rollback_file(files)
-
-      self.assertEqual(actual_latest, expected_latest)
-
-  def test_get_latest_rollback_file_emptyFileList_shouldReturnNone(self):
-      files = []
-
-      expected_latest = None
-      actual_latest = deploy.get_latest_rollback_file(files)
-
-      self.assertEqual(actual_latest, expected_latest)
-
-  def test_get_latest_rollback_file_NullFileList_shouldReturnNone(self):
-      files = None
-
-      expected_latest = None
-      actual_latest = deploy.get_latest_rollback_file(files)
-
-      self.assertEqual(actual_latest, expected_latest)
-
-  def test_persist_rollback_info_emptyDeploymentList_shouldNotWriteFile(self):
-      deployments = []
-      deploy.write_to_file = MagicMock()
-
-      deploy.persist_rollback_info(deployments)
-
-      deploy.write_to_file.assert_not_called()
-
-  def test_persist_rollback_info_NullDeploymentList_shouldNotWriteFile(self):
-      deployments = None
-      deploy.write_to_file = MagicMock()
-
-      deploy.persist_rollback_info(deployments)
-
-      deploy.write_to_file.assert_not_called()
-
-  def test_persist_rollback_info_NullDeploymentList_shouldNotWriteFile(self):
-      deployments = None
-      deploy.write_to_file = MagicMock()
-
-      deploy.persist_rollback_info(deployments)
-
-      deploy.write_to_file.assert_not_called()
-
 if __name__ == '__main__':
     unittest.main()
