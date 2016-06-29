@@ -1,5 +1,4 @@
 #!/usr/bin/python
-import os
 
 def prepare_deploy_statement(deployment):
     deployment_statement = "deploy {0} --runtime-name={1} --name={2}{3}"
@@ -27,3 +26,17 @@ def print_undeploy_pattern(undeploy_pattern):
 def print_undeploy_script(archives, undeploy_tag=None):
     for archive in archives:
         print prepare_undeploy_statement(archive, undeploy_tag)
+
+def generate_undeploy_script(archives, undeploy_tag=None):
+    script = ""
+    for archive in archives:
+        script = script + "\n" + prepare_undeploy_statement(archive, undeploy_tag)
+
+    return script
+
+def generate_deploy_script(archives):
+    script = ""
+    for archive in archives:
+        script = script + "\n" + prepare_deploy_statement(archive)
+
+    return script

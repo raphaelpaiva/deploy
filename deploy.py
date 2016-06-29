@@ -1,10 +1,12 @@
 #!/usr/bin/python
+
 import os
 import tempfile
 import argparse
 import cli_output
 import jbosscli.jbosscli as jbosscli
 import rollback
+import common
 
 def main():
     args = parse_args()
@@ -139,10 +141,11 @@ def read_server_group_mapping(mapping_file):
     """
     mapping = {}
     if os.path.isfile(mapping_file):
-        with open(mapping_file) as f:
-            for line in f:
-                (runtime_name, server_group) = line.strip().split("=")
-                mapping[runtime_name] = server_group
+        lines = common.read_from_file(mapping_file)
+        for line in lines:
+            (runtime_name, server_group) = line.strip().split("=")
+            mapping[runtime_name] = server_group
+
     return mapping
 
 def map_server_groups(archives, mapping):
@@ -151,6 +154,7 @@ def map_server_groups(archives, mapping):
         if archive.server_group is None and archive.runtime_name in mapping:
             archive.server_group = jbosscli.ServerGroup(mapping[archive.runtime_name], None)
 
+# TODO delete (moved to common)
 def fetch_enabled_deployments(controller, archives):
     """Fetch a list of enabled deployments with the same runtime name as the archives to deploy.
 
@@ -177,5 +181,47 @@ def fetch_enabled_deployments(controller, archives):
             runtime_names[deployment.runtime_name].server_group = deployment.server_group
 
     return enabled_deployments
+
+def generate_deploy_script(args):
+    path = os.path.abspath(args.path) + os.sep
+    undeploy_pattern = args.undeploy_pattern
+    skip_undeploy = True if undeploy_pattern else args.skip_undeploy
+    undeploy_tag = args.undeploy_tag
+    mapping_file = args.server_group_mapping_file
+
+    tag = extract_tag(path)
+
+    controller = common.initialize_controller(args)
+    archives = read_archive_files(path, tag)
+
+    header = ""
+    undeploy_script = ""
+
+    if controller:
+        enabled_deployments = common.fetch_enabled_deployments(controller, archives)
+        rollback_info_file = rollback.persist_rollback_info(enabled_deployments)
+        header = "# Rollback information saved in " + rollback_info_file
+
+        undeploy_script = cli_output.generate_undeploy_script(enabled_deployments)
+
+        if controller.domain:
+             map_deployments_server_groups(archives, mapping_file)
+    else:
+        undeploy_script = generate_undeploy_script()
+
+    deploy_script = cli_output.generate_deploy_script(archives)
+
+    return "{0}\n{1}\n{2}".format(header, undeploy_script, deploy_script)
+
+def generate_undeploy_script():
+    if not skip_undeploy:
+        cli_output.generate_undeploy_script(archives, undeploy_tag)
+
+    if undeploy_pattern:
+        cli_output.print_undeploy_pattern(undeploy_pattern)
+
+def map_deployments_server_groups(archives, mapping_file):
+    mapping = read_server_group_mapping(mapping_file)
+    map_server_groups(archives, mapping)
 
 if __name__ == "__main__": main()
