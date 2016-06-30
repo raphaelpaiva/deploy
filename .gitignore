@@ -1,3 +1,4 @@
 *.pyc
 rollback-info*
 .coverage
+htmlcov/
