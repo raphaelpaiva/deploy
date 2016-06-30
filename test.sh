@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 TEST_PATTERN="*_tests.py"
 JBOSSCLI_PATTERN="jbosscli*"
 

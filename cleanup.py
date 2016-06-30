@@ -1,14 +1,18 @@
 #!/usr/bin/python
 
 import jbosscli.jbosscli as jbosscli
-import argparse
 
 def generate_cleanup_script(args):
     controller = args.controller
     auth = args.auth
     num_deployments_to_keep = args.deployments_to_keep
 
+    # TODO use common.initialize_controller()
     cli = jbosscli.Jbosscli(controller, auth)
+
+    # TODO fail if cannot initialize controller
+
+    # TODO extract these logics below
 
     all_deployments = cli.get_deployments()
 
