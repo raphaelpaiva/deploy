@@ -3,6 +3,7 @@ import argparse
 import tempfile
 import rollback
 import deploy
+import cleanup
 
 def main():
     args = parse_args()
@@ -42,8 +43,15 @@ def parse_args():
                         help="A file containing a runtime-name=server-group mapping. Defaults to /tmp/server-group-mapping.properties",
                         default=default_server_group_mapping_file)
 
-    rollback_parser = subparsers.add_parser("rollback", description="Generates [un]deploy commands which you can pipe through jboss-cli script.")
+    rollback_parser = subparsers.add_parser("rollback", description="Rollbacks the last deploy made in a controller.")
     rollback_parser.set_defaults(func=do_rollback)
+
+    cleanup_parser = subparsers.add_parser("cleanup", description="Generates jboss-cli commands to remove disabled deployments based on lexicographical order of their names.")
+    cleanup_parser.add_argument("--deployments-to-keep", "-k",
+                                help="The minimum number of disabled deployments to keep. Defaults to 2.",
+                                type=int,
+                                default=2)
+    cleanup_parser.set_defaults(func=do_cleanup)
 
     return parser.parse_args()
 
@@ -52,6 +60,9 @@ def do_deploy(args):
 
 def do_rollback(args):
     print rollback.generate_rollback_script(args)
+
+def do_cleanup(args):
+    print cleanup.generate_cleanup_script(args)
 
 if __name__ == "__main__":
     main()
