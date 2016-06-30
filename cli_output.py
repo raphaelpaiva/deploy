@@ -8,10 +8,6 @@ def prepare_deploy_statement(deployment):
 
     return deployment_statement.format(deployment_path, deployment.runtime_name, deployment.name, server_group_statement)
 
-def print_deploy_script(archives):
-    for archive in archives:
-        print prepare_deploy_statement(archive)
-
 def prepare_undeploy_statement(deployment, undeploy_tag=None):
     undeploy_statement = "undeploy {0} --keep-content{1}"
     server_group_statement = " --all-relevant-server-groups" if deployment.server_group else ""
@@ -20,12 +16,8 @@ def prepare_undeploy_statement(deployment, undeploy_tag=None):
 
     return undeploy_statement.format(name, server_group_statement)
 
-def print_undeploy_pattern(undeploy_pattern):
-    print "undeploy --name=" + undeploy_pattern + " --keep-content"
-
-def print_undeploy_script(archives, undeploy_tag=None):
-    for archive in archives:
-        print prepare_undeploy_statement(archive, undeploy_tag)
+def generate_undeploy_pattern(undeploy_pattern):
+    return "undeploy --name=" + undeploy_pattern + " --keep-content"
 
 def generate_undeploy_script(archives, undeploy_tag=None):
     script = ""

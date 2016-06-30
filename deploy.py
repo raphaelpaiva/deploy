@@ -8,14 +8,6 @@ import jbosscli.jbosscli as jbosscli
 import rollback
 import common
 
-def initialize_controller(args):
-    """Try to instantiate and return the controller object. In case of errors, print it and return None."""
-    try:
-        return jbosscli.Jbosscli(args.controller, args.auth)
-    except Exception as e:
-        print e
-        return None
-
 def read_archive_files(path, tag):
     """Scan path looking for archive files. Return a list of archives with tag applied to their names. runtime_name remains as the filename."""
     archives = []
@@ -102,18 +94,19 @@ def generate_deploy_script(args):
         if controller.domain:
              map_deployments_server_groups(archives, mapping_file)
     else:
-        undeploy_script = generate_undeploy_script()
+        undeploy_script = generate_undeploy_script(args, archives)
 
     deploy_script = cli_output.generate_deploy_script(archives)
 
     return "{0}\n{1}\n{2}".format(header, undeploy_script, deploy_script)
 
-def generate_undeploy_script():
-    if not skip_undeploy:
-        cli_output.generate_undeploy_script(archives, undeploy_tag)
-
-    if undeploy_pattern:
-        cli_output.print_undeploy_pattern(undeploy_pattern)
+def generate_undeploy_script(args, archives=[]):
+    if args.skip_undeploy:
+        return ""
+    if args.undeploy_pattern:
+        return cli_output.generate_undeploy_pattern(args.undeploy_pattern)
+    else:
+        return cli_output.generate_undeploy_script(archives, args.undeploy_tag)
 
 def map_deployments_server_groups(archives, mapping_file):
     mapping = read_server_group_mapping(mapping_file)

@@ -68,7 +68,7 @@ def generate_rollback_script(args):
     controller = common.initialize_controller(args)
 
     if not controller:
-        return "# Cannot initialize the controller " + args.controller
+        return "# Cannot initialize the controller {0}. Rollback will not occour.".format(args.controller)
 
     rollback_file = get_rollback_file()
     #TODO Caso o arquivo seja None, retornar o texto de erro.

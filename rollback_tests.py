@@ -110,7 +110,7 @@ deploy  --runtime-name=abc.war --name=abc-v1.2.3 --server-groups=group\
   def test_generate_rollback_script_NoneController_shouldReturnErrorMessage(self):
     args = MagicMock()
     args.controller = "controller:port"
-    expected_script = "# Cannot initialize the controller controller:port"
+    expected_script = "# Cannot initialize the controller controller:port. Rollback will not occour."
 
     script = rollback.generate_rollback_script(args)
 
