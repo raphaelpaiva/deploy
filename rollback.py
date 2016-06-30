@@ -66,7 +66,10 @@ def list_rollback_files(directory):
 
 def generate_rollback_script(args):
     controller = common.initialize_controller(args)
-    #TODO Falhar caso nao venha o controller
+
+    if not controller:
+        return "# Cannot initialize the controller " + args.controller
+
     rollback_file = get_rollback_file()
     #TODO Caso o arquivo seja None, retornar o texto de erro.
 

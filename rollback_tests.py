@@ -1,10 +1,11 @@
+import os
+import tempfile
 from mock import MagicMock
 from mock import ANY
 from mock import mock_open
 from mock import patch
 import unittest
 import rollback
-import os
 from jbosscli.jbosscli import Deployment
 
 class TestRollback(unittest.TestCase):
@@ -88,6 +89,7 @@ class TestRollback(unittest.TestCase):
   @patch("rollback.common.read_from_file", MagicMock(return_value=["abc-v1.2.3 abc.war group"]))
   @patch("rollback.get_latest_rollback_file", MagicMock(return_value="rollback-info_test"))
   @patch("rollback.common.fetch_enabled_deployments", MagicMock(return_value=[Deployment("abc-v1.0.0", "abc.war", server_group="group")]))
+  @patch("rollback.common.initialize_controller", MagicMock())
   def test_generate_rollback_script(self):
       expected_script="""\
 # Using rollback information from {0}rollback-info_test
@@ -100,8 +102,24 @@ deploy  --runtime-name=abc.war --name=abc-v1.2.3 --server-groups=group\
       script = rollback.generate_rollback_script(None)
       self.assertEqual(script, expected_script)
 
-# TODO test the scenario where initialize_controller() returns None
+  def test_get_rollback_file_emptyDirectory_shouldReturnNone(self):
+      rollback_file = rollback.get_rollback_file(tempfile.gettempdir())
+      self.assertIsNone(rollback_file)
+
+  @patch("rollback.common.initialize_controller", MagicMock(return_value=None))
+  def test_generate_rollback_script_NoneController_shouldReturnErrorMessage(self):
+    args = MagicMock()
+    args.controller = "controller:port"
+    expected_script = "# Cannot initialize the controller controller:port"
+
+    script = rollback.generate_rollback_script(args)
+
+    self.assertEqual(script, expected_script)
+
+
 # TODO test the scenario where get_latest_rollback_file() returns None
+
+
 
 if __name__ == '__main__':
     unittest.main()
