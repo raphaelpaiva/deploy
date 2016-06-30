@@ -8,5 +8,11 @@ python:
 #  - "3.5-dev" # 3.5 development branch
 #  - "nightly"
 
-install: ./install.sh
-script: ./test.sh
+install:
+  - git submodule init
+  - git submodule update --remote --recursive
+  - python -m pip install -r requirements.txt
+
+script:
+  - chmod a+x test.sh
+  - ./test.sh
