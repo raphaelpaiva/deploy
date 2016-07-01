@@ -6,7 +6,7 @@ from mock import mock_open
 from mock import patch
 import unittest
 import rollback
-from jbosscli.jbosscli import Deployment
+from jbosscli import Deployment
 
 class TestRollback(unittest.TestCase):
   def test_get_latest_rollback_file_validFileList_shouldReturnLatestTimeStamp(self):

@@ -1,7 +1,7 @@
 import os
 import unittest
 import cli_output
-from jbosscli.jbosscli import Deployment
+from jbosscli import Deployment
 
 class CliOutputTests(unittest.TestCase):
   def test_prepare_deploy_statement_warfile(self):

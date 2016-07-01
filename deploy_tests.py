@@ -5,7 +5,7 @@ import unittest
 import cli_output
 import deploy
 import jbosscli.jbosscli as jbosscli
-from jbosscli.jbosscli import Deployment
+from jbosscli import Deployment
 
 from mock import MagicMock
 from mock import patch

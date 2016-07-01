@@ -1,7 +1,8 @@
 import os
 import glob
 import time
-from jbosscli.jbosscli import Deployment
+
+from jbosscli import Deployment
 import common
 import cli_output
 

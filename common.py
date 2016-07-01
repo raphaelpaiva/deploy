@@ -1,9 +1,9 @@
-import jbosscli.jbosscli as jbosscli
+from jbosscli import Jbosscli
 
 def initialize_controller(args):
     """Try to instantiate and return the controller object. In case of errors, print it and return None."""
     try:
-        return jbosscli.Jbosscli(args.controller, args.auth)
+        return Jbosscli(args.controller, args.auth)
     except Exception as e:
         print e
         return None
