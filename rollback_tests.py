@@ -116,8 +116,18 @@ deploy  --runtime-name=abc.war --name=abc-v1.2.3 --server-groups=group\
 
     self.assertEqual(script, expected_script)
 
+  @patch("rollback.common.initialize_controller", MagicMock())
+  @patch("rollback.get_rollback_file", MagicMock(return_value=None))
+  def test_generate_rollback_script_NoRollbackFile_shouldReturnErrorMessage(self):
+      current_dir = os.path.dirname(os.path.abspath(__file__))
 
-# TODO test the scenario where get_latest_rollback_file() returns None
+      args = MagicMock()
+      args.controller = "controller:port"
+      expected_script = "# Cannot find rollback-info file in {0}. Rollback will not occour.".format(current_dir)
+
+      script = rollback.generate_rollback_script(args)
+
+      self.assertEqual(script, expected_script)
 
 
 

@@ -1,7 +1,7 @@
 import os
 import glob
 import time
-import jbosscli.jbosscli as jbosscli
+from jbosscli.jbosscli import Deployment
 import common
 import cli_output
 
@@ -50,7 +50,7 @@ def read_rollback_info(rollback_file_path):
     lines = common.read_from_file(rollback_file_path)
     for line in lines:
         (name, runtime_name, server_group) = line.split()
-        archives.append(jbosscli.Deployment(name, runtime_name, server_group=server_group))
+        archives.append(Deployment(name, runtime_name, server_group=server_group))
 
     return archives
 
@@ -71,7 +71,9 @@ def generate_rollback_script(args):
         return "# Cannot initialize the controller {0}. Rollback will not occour.".format(args.controller)
 
     rollback_file = get_rollback_file()
-    #TODO Caso o arquivo seja None, retornar o texto de erro.
+
+    if not rollback_file:
+        return "# Cannot find rollback-info file in {0}. Rollback will not occour.".format(current_dir)
 
     archives = read_rollback_info(rollback_file)
     enabled_deployments = common.fetch_enabled_deployments(controller, archives)
