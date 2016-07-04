@@ -27,6 +27,7 @@ def generate_cleanup_script(args):
     return script
 
 def map_deployments_by_runtime_name(deployments):
+    """Aggregate deployments by their runtime name."""
     deployments_by_runtime_name = {}
 
     for d in deployments:
@@ -37,8 +38,9 @@ def map_deployments_by_runtime_name(deployments):
 
     return deployments_by_runtime_name
 
-def fetch_not_enabled_deployments(cli):
-    all_deployments = cli.get_deployments()
+def fetch_not_enabled_deployments(controller):
+    """Filter deployments that are not enabled from all deployments in the controller."""
+    all_deployments = controller.get_deployments()
 
     not_enabled = [x for x in all_deployments if not x.enabled]
 
