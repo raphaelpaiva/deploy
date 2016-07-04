@@ -17,7 +17,5 @@ class CommonTests(unittest.TestCase):
         self.assertIsNone(value)
         self.assertEquals(mock_stdout.getvalue(), "Failed to parse: host:port\n")
 
-
-
 if __name__ == "__main__":
     unittest.main()
