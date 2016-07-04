@@ -12,6 +12,7 @@ fi
 rm -f .coverage
 
 for f in $TEST_PATTERN; do
+  echo "-- $f"
   python -m coverage run --omit=$TEST_PATTERN,$JBOSSCLI_PATTERN -a $f
 done
 
