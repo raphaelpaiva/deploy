@@ -1,30 +1,20 @@
 #!/usr/bin/python
 
-import jbosscli.jbosscli as jbosscli
+import common
 
 def generate_cleanup_script(args):
     controller = args.controller
     auth = args.auth
     num_deployments_to_keep = args.deployments_to_keep
 
-    # TODO use common.initialize_controller()
-    cli = jbosscli.Jbosscli(controller, auth)
+    cli = common.initialize_controller(args)
 
-    # TODO fail if cannot initialize controller
+    if not cli:
+        return "# Could not initialize controller {0}. Cleanup will not occour.".format(controller)
 
-    # TODO extract these logics below
+    not_enabled_deployments = fetch_not_enabled_deployments(cli)
 
-    all_deployments = cli.get_deployments()
-
-    not_enabled = [x for x in all_deployments if not x.enabled]
-
-    deployments_by_runtime_name = {}
-
-    for d in not_enabled:
-        if d.runtime_name not in deployments_by_runtime_name:
-            deployments_by_runtime_name[d.runtime_name] = []
-
-        deployments_by_runtime_name[d.runtime_name].append(d)
+    deployments_by_runtime_name = map_deployments_by_runtime_name(not_enabled_deployments)
 
     script = ""
 
@@ -36,5 +26,20 @@ def generate_cleanup_script(args):
 
     return script
 
-if __name__ == "__main__":
-    main()
+def map_deployments_by_runtime_name(deployments):
+    deployments_by_runtime_name = {}
+
+    for d in deployments:
+        if d.runtime_name not in deployments_by_runtime_name:
+            deployments_by_runtime_name[d.runtime_name] = []
+
+        deployments_by_runtime_name[d.runtime_name].append(d)
+
+    return deployments_by_runtime_name
+
+def fetch_not_enabled_deployments(cli):
+    all_deployments = cli.get_deployments()
+
+    not_enabled = [x for x in all_deployments if not x.enabled]
+
+    return not_enabled
