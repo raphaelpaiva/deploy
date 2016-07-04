@@ -18,7 +18,7 @@ Usage
 -----
 Suppose you want to deploy version 5.2.0 of your app.
 
-    $deploy.py --controller mycontroller:9990 --auth user:password /path/to/5.2.0/
+    $./josie.py -c mycontroller:9990 --auth user:password deploy /path/to/5.2.0/
 
     # Rollback information saved in /path/to/rollback-info_1466105982374
     undeploy app-5.1.0 --keep-content
@@ -31,7 +31,7 @@ The script will scan the /path/to/5.2.0/ directory for deployments and generates
 
 Just pipe the output to the jbosscli script:
 
-    $deploy.py --controller mycontroller:9990 --auth user:password /path/to/5.2.0/ | /opt/jboss/bin/jboss-cli --connect controller=mycontroller:9999
+    $./josie.py --controller mycontroller:9990 --auth user:password deploy /path/to/5.2.0/ | /opt/jboss/bin/jboss-cli --connect controller=mycontroller:9999
 
 And voilá!
 
@@ -42,31 +42,18 @@ Command-line options
 
 For a short list, do:
 
-    $deploy.py --help
+    $josie.py [deploy|rollback|cleanup] --help
 
-    usage: deploy.py [-h] [--skip-undeploy] [--undeploy-pattern UNDEPLOY_PATTERN]
-                 [--undeploy-tag UNDEPLOY_TAG] [--controller CONTROLLER]
-                 [--auth AUTH]
-                 [--server-group-mapping-file SERVER_GROUP_MAPPING_FILE]
-                 [--rollback]
-                 path
+    usage: josie.py [-h] [-c CONTROLLER] [-a AUTH] {deploy,rollback,cleanup} ...
 
     Generates [un]deploy commands which you can pipe through jboss-cli script.
 
-    positional arguments:
-      path                  the path where the archive (.war, .jar) packages are stored
-
     optional arguments:
       -h, --help            show this help message and exit
-      --skip-undeploy       do not generate undeploy commands
-      --undeploy-pattern UNDEPLOY_PATTERN
-                            specify a regex pattern for the undeploy cammand. This implies --skip-undeploy.
-      --undeploy-tag UNDEPLOY_TAG
-                        specify a tag to append for the undeploy cammand.
-      --controller CONTROLLER The controller to deploy to.
-      --auth AUTH             The credentials to authenticate on the controller
-      --server-group-mapping-file SERVER_GROUP_MAPPING_FILE
-                        A file containing a runtime-name=server-group mapping.
-                        Defaults to /tmp/server-group-mapping.properties
-      --rollback        Rollback to a previous deployment. This depends on
-                        having a deployment-info file.
+      -c CONTROLLER, --controller CONTROLLER
+                        The controller to interact with.
+      -a AUTH, --auth AUTH  The credentials to authenticate on the controller
+
+      subcomands:
+      {deploy,rollback,cleanup}
+                              choose an action to take
