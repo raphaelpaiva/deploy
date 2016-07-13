@@ -8,7 +8,7 @@ def initialize_controller(args):
         print e
         return None
 
-def fetch_enabled_deployments(controller, archives):
+def fetch_enabled_deployments(controller, archives=[]):
     """Fetch a list of enabled deployments with the same runtime name as the archives to deploy.
 
     Arguments:
@@ -21,6 +21,9 @@ def fetch_enabled_deployments(controller, archives):
     It is mainly used to provide information to the undeploy script generation.
     """
     deployments = controller.get_assigned_deployments()
+
+    if not archives:
+        return [x for x in deployments if x.enabled]
 
     runtime_names = {}
     for archive in archives:

@@ -4,6 +4,7 @@ import tempfile
 import rollback
 import deploy
 import cleanup
+import list
 
 def main():
     args = parse_args()
@@ -53,6 +54,9 @@ def parse_args():
                                 default=2)
     cleanup_parser.set_defaults(func=do_cleanup)
 
+    list_parser = subparsers.add_parser("list", description="Lists deployments")
+    list_parser.set_defaults(func=do_list)
+
     return parser.parse_args()
 
 def do_deploy(args):
@@ -63,6 +67,9 @@ def do_rollback(args):
 
 def do_cleanup(args):
     print cleanup.generate_cleanup_script(args)
+
+def do_list(args):
+    print list.generate_list(args)
 
 if __name__ == "__main__":
     main()
