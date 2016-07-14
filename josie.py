@@ -55,6 +55,10 @@ def configure_deploy_parser(subparsers):
                         help="A file containing a runtime-name=server-group mapping. Defaults to /tmp/server-group-mapping.properties",
                         default=default_server_group_mapping_file)
 
+    deploy_parser.add_argument("--rollback-info-file-suffix",
+                        help="Will write rollback-info-<suffix>_<timestamp> files for rollback.",
+                        default="")
+
 def configure_rollback_parser(subparsers):
     rollback_parser = subparsers.add_parser("rollback", description="Rollbacks the last deploy made in a controller.")
 

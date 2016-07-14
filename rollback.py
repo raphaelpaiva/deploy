@@ -8,12 +8,12 @@ import cli_output
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
-def persist_rollback_info(deployments):
+def persist_rollback_info(deployments, rollback_filename_template="rollback-info_"):
     """Write name, runtime_name and server group of all enabled deployments to be replaced to a file named rollback-info_<timestamp>."""
     if not deployments:
         return
 
-    rollback_info_file = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "rollback-info_" + str(int(round(time.time() * 1000)))
+    rollback_info_file = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + rollback_filename_template + str(int(round(time.time() * 1000)))
     deployment_line_template = "{0} {1} {2}\n"
     rollback_info = ""
 
