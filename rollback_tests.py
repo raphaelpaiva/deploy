@@ -52,30 +52,31 @@ class TestRollback(unittest.TestCase):
       rollback.glob.glob.assert_called_with(dir + os.sep + rollback_filename_template + "*")
       self.assertEqual(rollback_file, expected_rollback_filename)
 
+  @patch("rollback.common.write_to_file", MagicMock())
   def test_persist_rollback_info_emptyDeploymentList_shouldNotWriteFile(self):
       deployments = []
-      rollback.common.write_to_file = MagicMock()
 
       rollback.persist_rollback_info(deployments)
 
       rollback.common.write_to_file.assert_not_called()
 
+  @patch("rollback.common.write_to_file", MagicMock())
   def test_persist_rollback_info_NullDeploymentList_shouldNotWriteFile(self):
       deployments = None
-      rollback.common.write_to_file = MagicMock()
 
       rollback.persist_rollback_info(deployments)
 
       rollback.common.write_to_file.assert_not_called()
 
+  @patch("rollback.common.write_to_file", MagicMock())
   def test_persist_rollback_info_oneDeployment_shouldWriteFile(self):
       deployments = [Deployment("abc", "abc.war", server_group="group")]
-      rollback.common.write_to_file = MagicMock()
 
       rollback.persist_rollback_info(deployments)
 
       rollback.common.write_to_file.assert_called_with(ANY, "abc abc.war group\n")
 
+  @patch("rollback.common.write_to_file", MagicMock())
   def test_persist_rollback_info_twoDeployments_shouldWriteFile(self):
       deployments = [Deployment("abc", "abc.war", server_group="group"), Deployment("cba-v5.2.0", "cba.war", server_group="pourg")]
 
