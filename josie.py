@@ -11,8 +11,6 @@ def main():
     args.func(args)
 
 def parse_args():
-    default_server_group_mapping_file = tempfile.gettempdir() + os.sep + "server-group-mapping.properties"
-
     parser = argparse.ArgumentParser(description="Generates [un]deploy commands which you can pipe through jboss-cli script.")
 
     parser.add_argument("-c", "--controller",
@@ -24,6 +22,19 @@ def parse_args():
                         default="jboss:jboss@123")
 
     subparsers = parser.add_subparsers(title="subcomands", help="choose an action to take")
+
+    configure_deploy_parser(subparsers)
+
+    configure_rollback_parser(subparsers)
+
+    configure_cleanup_parser(subparsers)
+
+    configure_list_parser(subparsers)
+
+    return parser.parse_args()
+
+def configure_deploy_parser(subparsers):
+    default_server_group_mapping_file = tempfile.gettempdir() + os.sep + "server-group-mapping.properties"
 
     deploy_parser = subparsers.add_parser("deploy", description="Generates [un]deloy commands for the packages inside PATH. The deployment name is appended with de name of the leaf directory in PATH.")
     deploy_parser.set_defaults(func=do_deploy)
@@ -44,9 +55,16 @@ def parse_args():
                         help="A file containing a runtime-name=server-group mapping. Defaults to /tmp/server-group-mapping.properties",
                         default=default_server_group_mapping_file)
 
+def configure_rollback_parser(subparsers):
     rollback_parser = subparsers.add_parser("rollback", description="Rollbacks the last deploy made in a controller.")
+
+    rollback_parser.add_argument("--rollback-info-file-suffix",
+                                 help="Will look for rollback-info-<suffix>_<timestamp> files for rollback.",
+                                 default="")
+
     rollback_parser.set_defaults(func=do_rollback)
 
+def configure_cleanup_parser(subparsers):
     cleanup_parser = subparsers.add_parser("cleanup", description="Generates jboss-cli commands to remove disabled deployments based on lexicographical order of their names.")
     cleanup_parser.add_argument("--deployments-to-keep", "-k",
                                 help="The minimum number of disabled deployments to keep. Defaults to 2.",
@@ -54,10 +72,9 @@ def parse_args():
                                 default=2)
     cleanup_parser.set_defaults(func=do_cleanup)
 
+def configure_list_parser(subparsers):
     list_parser = subparsers.add_parser("list", description="Lists deployments")
     list_parser.set_defaults(func=do_list)
-
-    return parser.parse_args()
 
 def do_deploy(args):
     print deploy.generate_deploy_script(args)

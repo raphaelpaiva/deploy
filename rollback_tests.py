@@ -17,6 +17,14 @@ class TestRollback(unittest.TestCase):
 
       self.assertEqual(actual_latest, expected_latest)
 
+  def test_get_latest_rollback_file_validFileList_rollbackfilesuffix_shouldReturnLatestTimeStamp(self):
+      files = "rollback-info-suffix_1465588121140 rollback-info-suffix_1465588289292 rollback-info-suffix_1465588416224".split()
+
+      expected_latest = "rollback-info-suffix_1465588416224"
+      actual_latest = rollback.get_latest_rollback_file(files, "rollback-info-suffix_")
+
+      self.assertEqual(actual_latest, expected_latest)
+
   def test_get_latest_rollback_file_emptyFileList_shouldReturnNone(self):
       files = []
 
@@ -32,6 +40,17 @@ class TestRollback(unittest.TestCase):
       actual_latest = rollback.get_latest_rollback_file(files)
 
       self.assertEqual(actual_latest, expected_latest)
+
+  @patch("rollback.glob.glob", MagicMock(return_value="rollback-info-suffix_1465588121140 rollback-info-suffix_1465588289292 rollback-info-suffix_1465588416224".split()))
+  def test_get_rollback_file_rollbackFileSuffix_shouldReturnLatestFile(self):
+      dir = tempfile.gettempdir()
+      rollback_filename_template = "rollback-info-suffix_"
+      expected_rollback_filename = dir + os.sep + "rollback-info-suffix_1465588416224"
+
+      rollback_file = rollback.get_rollback_file(dir, rollback_filename_template)
+
+      rollback.glob.glob.assert_called_with(dir + os.sep + rollback_filename_template + "*")
+      self.assertEqual(rollback_file, expected_rollback_filename)
 
   def test_persist_rollback_info_emptyDeploymentList_shouldNotWriteFile(self):
       deployments = []
@@ -57,7 +76,6 @@ class TestRollback(unittest.TestCase):
 
       rollback.common.write_to_file.assert_called_with(ANY, "abc abc.war group\n")
 
-
   def test_persist_rollback_info_twoDeployments_shouldWriteFile(self):
       deployments = [Deployment("abc", "abc.war", server_group="group"), Deployment("cba-v5.2.0", "cba.war", server_group="pourg")]
 
@@ -71,6 +89,13 @@ class TestRollback(unittest.TestCase):
       rollback.list_rollback_files("/home/directory")
 
       rollback.glob.glob.assert_called_with("/home/directory" + os.sep + "rollback-info_*")
+
+  @patch("rollback.glob.glob", MagicMock())
+  def test_list_rollback_files_valid_directory_specifiedRollbackSuffix_shouldCallGlobWithSuffix(self):
+
+      rollback.list_rollback_files("/home/directory", "rollback-info-suffix_")
+
+      rollback.glob.glob.assert_called_with("/home/directory" + os.sep + "rollback-info-suffix_*")
 
   @patch("rollback.common.read_from_file", MagicMock(return_value=["abc abc.war group"]))
   def test_read_rollback_info(self):
@@ -99,12 +124,41 @@ undeploy abc-v1.0.0 --keep-content --all-relevant-server-groups
 deploy  --runtime-name=abc.war --name=abc-v1.2.3 --server-groups=group\
 """.format(os.path.dirname(os.path.abspath(__file__)) + os.sep)
 
-      script = rollback.generate_rollback_script(None)
+      args = MagicMock()
+      args.args.rollback_info_file_suffix = ""
+
+      script = rollback.generate_rollback_script(args)
       self.assertEqual(script, expected_script)
 
   def test_get_rollback_file_emptyDirectory_shouldReturnNone(self):
       rollback_file = rollback.get_rollback_file(tempfile.gettempdir())
       self.assertIsNone(rollback_file)
+
+  @patch("rollback.common.read_from_file", MagicMock(return_value=["abc-v1.2.3 abc.war group"]))
+  @patch("rollback.common.fetch_enabled_deployments", MagicMock(return_value=[Deployment("abc-v1.0.0", "abc.war", server_group="group")]))
+  @patch("rollback.common.initialize_controller", MagicMock())
+  @patch("rollback.glob.glob", MagicMock(return_value="rollback-info-suffix_1465588121140 rollback-info-suffix_1465588289292 rollback-info-suffix_1465588416224".split()))
+  def test_generate_rollback_script_rollbackfile_suffix(self):
+      expected_script="""\
+# Using rollback information from {0}rollback-info-suffix_1465588416224
+
+undeploy abc-v1.0.0 --keep-content --all-relevant-server-groups
+
+deploy  --runtime-name=abc.war --name=abc-v1.2.3 --server-groups=group\
+""".format(os.path.dirname(os.path.abspath(__file__)) + os.sep)
+
+      args = MagicMock()
+      args.rollback_info_file_suffix = "suffix"
+
+      script = rollback.generate_rollback_script(args)
+
+      rollback.glob.glob.assert_called_with(os.path.dirname(os.path.abspath(__file__)) + os.sep + "rollback-info-suffix_*")
+      self.assertEqual(script, expected_script)
+
+  def test_get_rollback_file_emptyDirectory_shouldReturnNone(self):
+      rollback_file = rollback.get_rollback_file(tempfile.gettempdir())
+      self.assertIsNone(rollback_file)
+
 
   @patch("rollback.common.initialize_controller", MagicMock(return_value=None))
   def test_generate_rollback_script_NoneController_shouldReturnErrorMessage(self):
@@ -129,7 +183,17 @@ deploy  --runtime-name=abc.war --name=abc-v1.2.3 --server-groups=group\
 
       self.assertEqual(script, expected_script)
 
+  def test_generate_rollback_filename_template_emptySuffix_shouldReturnDefaultTemplate(self):
+      expected_rollback_filename_template = "rollback-info_"
+      rollback_filename_template = rollback.generate_rollback_filename_template("")
 
+      self.assertEqual(rollback_filename_template, expected_rollback_filename_template)
+
+  def test_generate_rollback_filename_template_providedSuffix_shouldReturnSuffixedTemplate(self):
+      expected_rollback_filename_template = "rollback-info-suffix-ix_"
+      rollback_filename_template = rollback.generate_rollback_filename_template("suffix-ix")
+
+      self.assertEqual(rollback_filename_template, expected_rollback_filename_template)
 
 if __name__ == '__main__':
     unittest.main()

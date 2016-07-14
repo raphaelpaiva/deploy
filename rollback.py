@@ -25,23 +25,23 @@ def persist_rollback_info(deployments):
 
     return rollback_info_file
 
-def get_latest_rollback_file(files):
+def get_latest_rollback_file(files, rollback_filename_template="rollback-info_"):
     """Given a list of rollback file names, return the latest file name based on the name's timestamp."""
     if not files:
         return None
     timestamps = sorted([int(x.split("_")[1]) for x in files], reverse=True)
     latest = timestamps[0]
-    return "rollback-info_" + str(latest)
+    return rollback_filename_template + str(latest)
 
-def get_rollback_file(directory=current_dir):
-    files = list_rollback_files(directory)
+def get_rollback_file(directory=current_dir, rollback_filename_template="rollback-info_"):
+    files = list_rollback_files(directory, rollback_filename_template)
 
-    rollback_filename = get_latest_rollback_file(files)
+    rollback_filename = get_latest_rollback_file(files, rollback_filename_template)
 
     if not rollback_filename:
         return None
 
-    rollback_file_path = current_dir + os.sep + rollback_filename
+    rollback_file_path = directory + os.sep + rollback_filename
 
     return rollback_file_path
 
@@ -55,15 +55,21 @@ def read_rollback_info(rollback_file_path):
 
     return archives
 
-def list_rollback_files(directory):
+def list_rollback_files(directory, rollback_filename_template="rollback-info_"):
     """List files in the directory whose name starts with rollback-info_. Return a list with the filenames.
 
     Arguments:
     directory -- the directory to search the files
     """
-    rollback_files_pattern = directory + os.sep + "rollback-info_*"
+    rollback_files_pattern = directory + os.sep + rollback_filename_template + "*"
 
     return glob.glob(rollback_files_pattern)
+
+def generate_rollback_filename_template(rollback_info_file_suffix):
+    if not rollback_info_file_suffix:
+        return "rollback-info_"
+    else:
+        return "rollback-info-{0}_".format(rollback_info_file_suffix)
 
 def generate_rollback_script(args):
     controller = common.initialize_controller(args)
@@ -71,7 +77,9 @@ def generate_rollback_script(args):
     if not controller:
         return "# Cannot initialize the controller {0}. Rollback will not occour.".format(args.controller)
 
-    rollback_file = get_rollback_file()
+    rollback_filename_template = generate_rollback_filename_template(args.rollback_info_file_suffix)
+
+    rollback_file = get_rollback_file(rollback_filename_template=rollback_filename_template)
 
     if not rollback_file:
         return "# Cannot find rollback-info file in {0}. Rollback will not occour.".format(current_dir)
