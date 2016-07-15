@@ -89,7 +89,7 @@ def generate_deploy_script(args):
 
         rollback_filename_template = rollback.generate_rollback_filename_template(args.rollback_info_file_suffix)
         rollback_info_file = rollback.persist_rollback_info(enabled_deployments, rollback_filename_template)
-        header = "# Rollback information saved in " + rollback_info_file
+        header = "# Rollback information saved in " + rollback_info_file if rollback_info_file else ""
 
         undeploy_script = cli_output.generate_undeploy_script(enabled_deployments)
 

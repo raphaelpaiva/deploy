@@ -126,6 +126,31 @@ deploy {1} --runtime-name=abc.war --name=abc-v1.2.3 --server-groups=group\
 
       self.assertEqual(script, expected_script)
 
+  @patch("deploy.common.fetch_enabled_deployments", MagicMock(return_value=[]))
+  @patch("deploy.common.read_from_file", MagicMock(return_value=["abc.war=group"]))
+  @patch("os.path.isfile", MagicMock(return_value=True))
+  @patch("deploy.read_archive_files", MagicMock(return_value=[Deployment("abc-v1.2.3", "abc.war", path=current_dir + os.sep + "v1.2.3" + os.sep + "abc.war")]))
+  def test_generate_deploy_script_noEnabledDeployments_shouldNotPrintRollbackHeader(self):
+      expected_script="""
+
+
+deploy {1} --runtime-name=abc.war --name=abc-v1.2.3 --server-groups=group\
+""".format(current_dir + os.sep,
+           current_dir + os.sep + "v1.2.3" + os.sep + "abc.war")
+      args = MagicMock()
+      args.path = current_dir + os.sep + "v1.2.3"
+      args.undeploy_pattern = None
+      args.undeploy_tag = None
+
+      mock_controller = MagicMock()
+      mock_controller.domain = True
+      deploy.common.initialize_controller = MagicMock(return_value=mock_controller)
+
+      script = deploy.generate_deploy_script(args)
+
+      self.assertEqual(script, expected_script)
+
+
   @patch("deploy.read_archive_files", MagicMock(return_value=[Deployment("system-v1.2.3", "system.war", path=current_dir + os.sep + "v1.2.3" + os.sep + "system.war")]))
   def test_generate_deploy_script_skip_local_undeploy(self):
       expected_script = """
