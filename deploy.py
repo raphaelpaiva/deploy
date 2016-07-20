@@ -4,7 +4,7 @@ import os
 import tempfile
 import argparse
 import cli_output
-import jbosscli.jbosscli as jbosscli
+import jbosscli
 import rollback
 import common
 
