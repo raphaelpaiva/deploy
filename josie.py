@@ -1,10 +1,12 @@
 import os
 import argparse
 import tempfile
+
 import rollback
 import deploy
 import cleanup
 import list
+import http_test
 
 def main():
     args = parse_args()
@@ -24,12 +26,10 @@ def parse_args():
     subparsers = parser.add_subparsers(title="subcomands", help="choose an action to take")
 
     configure_deploy_parser(subparsers)
-
     configure_rollback_parser(subparsers)
-
     configure_cleanup_parser(subparsers)
-
     configure_list_parser(subparsers)
+    configure_http_test_parser(subparsers)
 
     return parser.parse_args()
 
@@ -80,6 +80,13 @@ def configure_list_parser(subparsers):
     list_parser = subparsers.add_parser("list", description="Lists deployments")
     list_parser.set_defaults(func=do_list)
 
+def configure_http_test_parser(subparsers):
+    http_test_parser = subparsers.add_parser("http-test", description="Teste the context root of deployed modules for http responses that are not 5xx or 4xx.")
+    http_test_parser.add_argument("--base-url",
+                                  help="The base url to test the context roots. If your app is http://company.com/app, then base-url is company.com.",
+                                  default="")
+    http_test_parser.set_defaults(func=do_http_test)
+
 def do_deploy(args):
     print deploy.generate_deploy_script(args)
 
@@ -91,6 +98,9 @@ def do_cleanup(args):
 
 def do_list(args):
     print list.generate_list(args)
+
+def do_http_test(args):
+    print http_test.generate_test_list(args)
 
 if __name__ == "__main__":
     main()
