@@ -5,7 +5,7 @@ import tempfile
 import rollback
 import deploy
 import cleanup
-import list
+import verify_deployments
 import http_test
 
 def main():
@@ -77,7 +77,8 @@ def configure_cleanup_parser(subparsers):
     cleanup_parser.set_defaults(func=do_cleanup)
 
 def configure_list_parser(subparsers):
-    list_parser = subparsers.add_parser("list", description="Lists deployments")
+    list_parser = subparsers.add_parser("verify-deployments", description="verifies deployments")
+    list_parser.add_argument("path", help="the path where the archive (.ear, .war, .jar) packages are stored")
     list_parser.set_defaults(func=do_list)
 
 def configure_http_test_parser(subparsers):
@@ -97,7 +98,7 @@ def do_cleanup(args):
     print cleanup.generate_cleanup_script(args)
 
 def do_list(args):
-    print list.generate_list(args)
+    print verify_deployments.generate_list(args)
 
 def do_http_test(args):
     print http_test.generate_test_list(args)
