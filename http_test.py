@@ -11,12 +11,21 @@ def generate_test_list(args):
 
     modules = [x for x in assigned_deployments if x.enabled and ".jar" not in x.runtime_name]
 
-    output = ""
+    error_modules = []
 
     for module in modules:
         app = controller.fecth_context_root(module)
         url = "http://{0}{1}".format(base_url, app)
         r = requests.get(url)
-        output += url + " " + str(r.status_code) + "\n"
+
+        if r.status_code >= 400:
+            error_modules.append(url + " " + str(r.status_code))
+
+    output = "Testing http access to modules in {0}\n".format("http://" + base_url)
+    if error_modules:
+        output += "Some modules where inaccessible:\n"
+        output += "\n".join(error_modules)
+    else:
+        output += "OK!"
 
     return output
