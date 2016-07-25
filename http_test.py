@@ -2,6 +2,8 @@ import requests
 
 import jbosscli
 
+OK_RETURN_CODE = 0
+
 def generate_test_list(args):
     controller = jbosscli.Jbosscli(args.controller, args.auth)
 
@@ -21,11 +23,11 @@ def generate_test_list(args):
         if r.status_code >= 400:
             error_modules.append(url + " " + str(r.status_code))
 
-    output = "Testing http access to modules in {0}\n".format("http://" + base_url)
+    output = ""
     if error_modules:
         output += "Some modules where inaccessible:\n"
         output += "\n".join(error_modules)
     else:
         output += "OK!"
 
-    return output
+    return (output, OK_RETURN_CODE)

@@ -79,7 +79,7 @@ def configure_cleanup_parser(subparsers):
 def configure_list_parser(subparsers):
     list_parser = subparsers.add_parser("verify-deployments", description="verifies deployments")
     list_parser.add_argument("path", help="the path where the archive (.ear, .war, .jar) packages are stored")
-    list_parser.set_defaults(func=do_list)
+    list_parser.set_defaults(func=do_verify_deployments)
 
 def configure_http_test_parser(subparsers):
     http_test_parser = subparsers.add_parser("http-test", description="Teste the context root of deployed modules for http responses that are not 5xx or 4xx.")
@@ -97,11 +97,20 @@ def do_rollback(args):
 def do_cleanup(args):
     print cleanup.generate_cleanup_script(args)
 
-def do_list(args):
-    print verify_deployments.generate_list(args)
+def do_verify_deployments(args):
+    run(verify_deployments.verify, args)
 
 def do_http_test(args):
-    print http_test.generate_test_list(args)
+    run(http_test.generate_test_list, args)
+
+def run(func, args):
+    result = func(args)
+
+    output = result[0]
+    ret_code = result[1]
+
+    print output
+    return ret_code
 
 if __name__ == "__main__":
     main()

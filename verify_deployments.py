@@ -3,15 +3,18 @@ import os
 import common
 import deploy
 
-def generate_list(args):
+INITIALIZE_ERROR_RET_CODE = 2
+OK_RETURN_CODE            = 0
+
+def verify(args):
     path = os.path.abspath(args.path) + os.sep
     tag = deploy.extract_tag(path)
 
     controller = common.initialize_controller(args)
     if controller is None:
-        return "# Cannot reach controller {0}.".format(args.controller)
+        return ("# Cannot reach controller {0}.".format(args.controller), INITIALIZE_ERROR_RET_CODE)
 
-    output = "Testing deployments in {0} against {1}\n".format(args.controller, path)
+    output = ""
 
     enabled_deployments = common.fetch_enabled_deployments(controller)
 
@@ -20,10 +23,7 @@ def generate_list(args):
     deployed_names = {x.name for x in enabled_deployments}
     to_be_deployed_names = {x.name for x in to_be_deployed}
 
-    everything_deployed = to_be_deployed_names.issubset(deployed_names)
-
-    #output += str(deployed_names)
-    #output += "\n\n" + str(to_be_deployed_names)
+    everything_deployed = verify_deployments(to_be_deployed_names, deployed_names)
 
     if everything_deployed:
         output += "OK!"
@@ -32,4 +32,7 @@ def generate_list(args):
         output += "ERROR: some modules were not deployed:\n"
         output += "\n".join(not_deployed)
 
-    return output
+    return (output, OK_RETURN_CODE)
+
+def verify_deployments(to_be, deployed):
+    return to_be.issubset(deployed)
