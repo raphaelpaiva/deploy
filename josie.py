@@ -1,6 +1,7 @@
 import os
 import argparse
 import tempfile
+from sys import exit
 
 import rollback
 import deploy
@@ -110,7 +111,7 @@ def run(func, args):
     ret_code = result[1]
 
     print output
-    return ret_code
+    exit(ret_code)
 
 if __name__ == "__main__":
     main()

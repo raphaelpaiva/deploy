@@ -2,7 +2,8 @@ import requests
 
 import jbosscli
 
-OK_RETURN_CODE = 0
+OK_RET_CODE = 0
+ERROR_RET_CODE = 1
 
 def generate_test_list(args):
     controller = jbosscli.Jbosscli(args.controller, args.auth)
@@ -24,10 +25,13 @@ def generate_test_list(args):
             error_modules.append(url + " " + str(r.status_code))
 
     output = ""
+    return_code = None
     if error_modules:
-        output += "Some modules where inaccessible:\n"
+        output += "Some modules were inaccessible:\n"
         output += "\n".join(error_modules)
+        return_code = ERROR_RET_CODE
     else:
         output += "OK!"
+        return_code = OK_RET_CODE
 
-    return (output, OK_RETURN_CODE)
+    return (output, return_code)
