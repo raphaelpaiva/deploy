@@ -56,6 +56,21 @@ class TestDeploy(unittest.TestCase):
       self.assertEqual(deployments[2].name, "ddd-5.0.0.1")
       self.assertEqual(deployments[2].runtime_name, "ddd.jar")
 
+  @patch("deploy.os.listdir", MagicMock(return_value=["aaa.war", "bbb.war", "ccc.txt", "ddd.jar"]))
+  def test_read_archive_files_filesSpecified_shouldReturnOnlySpecifiedFiles(self):
+      tag = "5.0.0.1"
+      path = "/tmp/deploy/" + tag
+      files = ['aaa.war', 'bbb.war']
+
+      deployments = deploy.read_archive_files(path, tag, files)
+
+      self.assertEqual(len(deployments), 2)
+      self.assertEqual(deployments[0].name, "aaa-5.0.0.1")
+      self.assertEqual(deployments[0].runtime_name, "aaa.war")
+
+      self.assertEqual(deployments[1].name, "bbb-5.0.0.1")
+      self.assertEqual(deployments[1].runtime_name, "bbb.war")
+
   def test_generate_deploy_script_emptyParams_shouldReturnEmptyString(self):
       expected_script = ""
       args = MagicMock()

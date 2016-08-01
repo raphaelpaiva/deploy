@@ -8,12 +8,13 @@ import jbosscli
 import rollback
 import common
 
-def read_archive_files(path, tag):
+def read_archive_files(path, tag, files=[]):
     """Scan path looking for archive files. Return a list of archives with tag applied to their names. runtime_name remains as the filename."""
     archives = []
+
     for file in os.listdir(path):
-        if is_archive(file):
-            runtime_name = file.split(os.sep)[-1]
+        runtime_name = file.split(os.sep)[-1]
+        if (not files or runtime_name in files) and is_archive(file):
             name = runtime_name.replace(".ear", "").replace(".war", "").replace(".jar", "") + "-" + tag
             enabled = False
             deployment = jbosscli.Deployment(name, runtime_name, enabled, path=path + file)
