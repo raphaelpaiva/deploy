@@ -72,6 +72,7 @@ def map_server_groups(archives, mapping):
 
 def generate_deploy_script(args):
     path = os.path.abspath(args.path) + os.sep
+    files_filter = args.files
     undeploy_pattern = args.undeploy_pattern
     skip_undeploy = True if undeploy_pattern else args.skip_undeploy
     undeploy_tag = args.undeploy_tag
@@ -80,7 +81,7 @@ def generate_deploy_script(args):
     tag = extract_tag(path)
 
     controller = common.initialize_controller(args)
-    archives = read_archive_files(path, tag)
+    archives = read_archive_files(path, tag, files_filter)
 
     header = ""
     undeploy_script = ""
@@ -114,5 +115,3 @@ def generate_undeploy_script(args, archives=[]):
 def map_deployments_server_groups(archives, mapping_file):
     mapping = read_server_group_mapping(mapping_file)
     map_server_groups(archives, mapping)
-
-if __name__ == "__main__": main()

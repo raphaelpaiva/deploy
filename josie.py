@@ -43,22 +43,28 @@ def configure_deploy_parser(subparsers):
     deploy_parser.add_argument("path", help="the path where the archive (.ear, .war, .jar) packages are stored")
 
     deploy_parser.add_argument("--skip-undeploy",
-                        help="do not generate undeploy commands",
-                        action="store_true")
+                               help="do not generate undeploy commands",
+                               action="store_true")
 
     deploy_parser.add_argument("--undeploy-pattern",
-                        help="specify a regex pattern for the undeploy cammands. This implies --skip-undeploy.")
+                               help="specify a regex pattern for the undeploy cammands. This implies --skip-undeploy.")
 
     deploy_parser.add_argument("--undeploy-tag",
-                        help="specify a tag to append for the undeploy cammand.")
+                               help="specify a tag to append for the undeploy cammand.")
 
     deploy_parser.add_argument("--server-group-mapping-file",
-                        help="A file containing a runtime-name=server-group mapping. Defaults to /tmp/server-group-mapping.properties",
-                        default=default_server_group_mapping_file)
+                               help="A file containing a runtime-name=server-group mapping. Defaults to /tmp/server-group-mapping.properties",
+                               default=default_server_group_mapping_file)
 
     deploy_parser.add_argument("--rollback-info-file-suffix",
-                        help="Will write rollback-info-<suffix>_<timestamp> files for rollback.",
-                        default="")
+                               help="Will write rollback-info-<suffix>_<timestamp> files for rollback.",
+                               default="")
+
+    deploy_parser.add_argument("-f", "--file",
+                               action="append",
+                               dest="files",
+                               help="Specify packages to deploy. This doesn't need to be a path, but file names.",
+                               default=[])
 
 def configure_rollback_parser(subparsers):
     rollback_parser = subparsers.add_parser("rollback", description="Rollbacks the last deploy made in a controller.")
