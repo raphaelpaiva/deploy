@@ -34,4 +34,4 @@ def generate_test_list(args):
         output += "OK!"
         return_code = OK_RET_CODE
 
-    return (output, return_code)
+    return (output, return_code, "")
