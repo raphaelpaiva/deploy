@@ -1,7 +1,10 @@
+from __future__ import print_function
+
 import os
 import argparse
 import tempfile
 from sys import exit
+from sys import stderr
 
 import rollback
 import deploy
@@ -96,13 +99,13 @@ def configure_http_test_parser(subparsers):
     http_test_parser.set_defaults(func=do_http_test)
 
 def do_deploy(args):
-    print deploy.generate_deploy_script(args)
+    print(deploy.generate_deploy_script(args))
 
 def do_rollback(args):
-    print rollback.generate_rollback_script(args)
+    print(rollback.generate_rollback_script(args))
 
 def do_cleanup(args):
-    print cleanup.generate_cleanup_script(args)
+    print(cleanup.generate_cleanup_script(args))
 
 def do_verify_deployments(args):
     run(verify_deployments.verify, args)
@@ -115,8 +118,10 @@ def run(func, args):
 
     output = result[0]
     ret_code = result[1]
+    err = result[2]
 
-    print output
+    print(output)
+    print(err, file=stderr)
     exit(ret_code)
 
 if __name__ == "__main__":
