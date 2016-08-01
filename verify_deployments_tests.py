@@ -33,9 +33,11 @@ class VerifyDeploymentsTests(unittest.TestCase):
         result = verify_deployments.verify(args)
         output = result[0]
         return_code = result[1]
+        stderr = result[2]
 
         self.assertEquals(return_code, 1)
-        self.assertEquals(output, "ERROR: some modules were not deployed:\nppa-1.3.2")
+        self.assertEquals(output, "ERROR: some modules were not deployed:\n")
+        self.assertEquals(stderr, "ppa-1.3.2")
 
     @patch("verify_deployments.deploy.read_archive_files", MagicMock(return_value=[deployment_app]))
     @patch("verify_deployments.common.fetch_enabled_deployments", MagicMock(return_value=[deployment_app, deployment_ppa]))

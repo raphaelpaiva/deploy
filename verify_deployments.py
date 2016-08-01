@@ -16,6 +16,7 @@ def verify(args):
         return ("# Cannot reach controller {0}.".format(args.controller), INIT_ERROR_RET_CODE)
 
     output = ""
+    err = ""
 
     enabled_deployments = common.fetch_enabled_deployments(controller)
 
@@ -37,10 +38,10 @@ def verify(args):
     else:
         not_deployed = to_be_deployed_names - deployed_names
         output += "ERROR: some modules were not deployed:\n"
-        output += "\n".join(not_deployed)
+        err += "\n".join(not_deployed)
         return_code = ERROR_RET_CODE
 
-    return (output, return_code)
+    return (output, return_code, err)
 
 def verify_deployments(to_be, deployed):
     return to_be.issubset(deployed)
