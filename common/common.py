@@ -1,4 +1,6 @@
-from jbosscli import Jbosscli
+from jbosscli import Jbosscli, Deployment
+
+import os
 
 def initialize_controller(args):
     """Try to instantiate and return the controller object. In case of errors, print it and return None."""
@@ -38,7 +40,6 @@ def fetch_enabled_deployments(controller, archives=[]):
 
     return enabled_deployments
 
-
 def write_to_file(file, content): #pragma: no cover
     """Write content to file."""
     with open(file, "w") as f:
@@ -50,3 +51,43 @@ def read_from_file(path): #pragma: no cover
         lines = f.readlines()
 
     return lines
+
+def is_archive(file):
+    """Return true if file name ends with .ear, .war or .jar"""
+    return file.endswith('.ear') or file.endswith('.war') or file.endswith('.jar')
+
+def read_archive_files(path, tag, files=[]):
+    """Scan path looking for archive files. Return a list of archives with tag applied to their names. runtime_name remains as the filename."""
+    archives = []
+
+    for file in os.listdir(path):
+        runtime_name = file.split(os.sep)[-1]
+        if (not files or runtime_name in files) and is_archive(file):
+            name = runtime_name.replace(".ear", "").replace(".war", "").replace(".jar", "") + "-" + tag
+            enabled = False
+            deployment = Deployment(name, runtime_name, enabled, path=path + file)
+            archives.append(deployment)
+
+    return archives
+
+def extract_tag(path):
+    """Extract the name of the directory where the deployments are placed.
+
+    Arguments:
+    path -- the path to extract the name from.
+
+    This simply reads the leaf dir in a path.
+    "/path/to/deployment" returns "deployment"
+    "../relative/path/" returns "path"
+    "abc" returns "abc"
+    """
+    if path.endswith(os.sep):
+        path = path[:-1]
+
+    return path.split(os.sep)[-1]
+
+def generate_rollback_filename_template(rollback_info_file_suffix):
+    if not rollback_info_file_suffix:
+        return "rollback-info_"
+    else:
+        return "rollback-info-{0}_".format(rollback_info_file_suffix)

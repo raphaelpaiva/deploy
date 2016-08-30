@@ -1,46 +1,10 @@
 #!/usr/bin/python
 
 import os
-import tempfile
-import argparse
+import time
 import cli_output
 import jbosscli
-import rollback
 import common
-
-def read_archive_files(path, tag, files=[]):
-    """Scan path looking for archive files. Return a list of archives with tag applied to their names. runtime_name remains as the filename."""
-    archives = []
-
-    for file in os.listdir(path):
-        runtime_name = file.split(os.sep)[-1]
-        if (not files or runtime_name in files) and is_archive(file):
-            name = runtime_name.replace(".ear", "").replace(".war", "").replace(".jar", "") + "-" + tag
-            enabled = False
-            deployment = jbosscli.Deployment(name, runtime_name, enabled, path=path + file)
-            archives.append(deployment)
-
-    return archives
-
-def is_archive(file):
-    """Return true if file name ends with .ear, .war or .jar"""
-    return file.endswith('.ear') or file.endswith('.war') or file.endswith('.jar')
-
-def extract_tag(path):
-    """Extract the name of the directory where the deployments are placed.
-
-    Arguments:
-    path -- the path to extract the name from.
-
-    This simply reads the leaf dir in a path.
-    "/path/to/deployment" returns "deployment"
-    "../relative/path/" returns "path"
-    "abc" returns "abc"
-    """
-    if path.endswith(os.sep):
-        path = path[:-1]
-
-    return path.split(os.sep)[-1]
 
 def read_server_group_mapping(mapping_file):
     """Given a mapping file path, read it and return a dict with its contents.
@@ -70,7 +34,7 @@ def map_server_groups(archives, mapping):
         if archive.server_group is None and archive.runtime_name in mapping:
             archive.server_group = jbosscli.ServerGroup(mapping[archive.runtime_name], None)
 
-def generate_deploy_script(args):
+def generate_deploy_script(args, rollback_file_dir=None):
     path = os.path.abspath(args.path) + os.sep
     files_filter = args.files
     undeploy_pattern = args.undeploy_pattern
@@ -78,10 +42,10 @@ def generate_deploy_script(args):
     undeploy_tag = args.undeploy_tag
     mapping_file = args.server_group_mapping_file
 
-    tag = extract_tag(path)
+    tag = common.extract_tag(path)
 
     controller = common.initialize_controller(args)
-    archives = read_archive_files(path, tag, files_filter)
+    archives = common.read_archive_files(path, tag, files_filter)
 
     header = ""
     undeploy_script = ""
@@ -89,8 +53,8 @@ def generate_deploy_script(args):
     if controller:
         enabled_deployments = common.fetch_enabled_deployments(controller, archives)
 
-        rollback_filename_template = rollback.generate_rollback_filename_template(args.rollback_info_file_suffix)
-        rollback_info_file = rollback.persist_rollback_info(enabled_deployments, rollback_filename_template)
+        rollback_filename_template = common.generate_rollback_filename_template(args.rollback_info_file_suffix)
+        rollback_info_file = persist_rollback_info(enabled_deployments, rollback_filename_template, rollback_file_dir)
         header = "# Rollback information saved in " + rollback_info_file if rollback_info_file else ""
 
         undeploy_script = cli_output.generate_undeploy_script(enabled_deployments)
@@ -103,6 +67,25 @@ def generate_deploy_script(args):
     deploy_script = cli_output.generate_deploy_script(archives)
 
     return "{0}\n{1}\n{2}".format(header, undeploy_script, deploy_script)
+
+def persist_rollback_info(deployments, rollback_filename_template="rollback-info_", rollback_file_dir=None):
+    """Write name, runtime_name and server group of all enabled deployments to be replaced to a file named rollback-info_<timestamp>."""
+    if not deployments:
+        return
+
+    directory = rollback_file_dir if rollback_file_dir else os.path.dirname(os.path.abspath(__file__))
+
+    rollback_info_file = directory + os.path.sep + rollback_filename_template + str(int(round(time.time() * 1000)))
+    deployment_line_template = "{0} {1} {2}\n"
+    rollback_info = ""
+
+    for deployment in deployments:
+        line = deployment_line_template.format(deployment.name, deployment.runtime_name, deployment.server_group)
+        rollback_info += line
+
+    common.write_to_file(rollback_info_file, rollback_info)
+
+    return rollback_info_file
 
 def generate_undeploy_script(args, archives=[]):
     if args.skip_undeploy:

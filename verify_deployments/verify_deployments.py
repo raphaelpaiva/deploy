@@ -1,7 +1,6 @@
 import os
 
 import common
-import deploy
 
 OK_RET_CODE         = 0
 ERROR_RET_CODE      = 1
@@ -9,7 +8,7 @@ INIT_ERROR_RET_CODE = 2
 
 def verify(args):
     path = os.path.abspath(args.path) + os.sep
-    tag = deploy.extract_tag(path)
+    tag = common.extract_tag(path)
 
     controller = common.initialize_controller(args)
     if controller is None:
@@ -20,7 +19,7 @@ def verify(args):
 
     enabled_deployments = common.fetch_enabled_deployments(controller)
 
-    to_be_deployed = deploy.read_archive_files(path, tag)
+    to_be_deployed = common.read_archive_files(path, tag)
 
     if not to_be_deployed:
         return ("Deployment directory is empty!", INIT_ERROR_RET_CODE, "")
