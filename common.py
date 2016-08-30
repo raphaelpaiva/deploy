@@ -52,7 +52,6 @@ def read_from_file(path): #pragma: no cover
 
     return lines
 
-
 def is_archive(file):
     """Return true if file name ends with .ear, .war or .jar"""
     return file.endswith('.ear') or file.endswith('.war') or file.endswith('.jar')
