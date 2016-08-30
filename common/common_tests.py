@@ -68,7 +68,7 @@ class CommonTests(unittest.TestCase):
         self.assertEquals(enabled_deployments[0].name, "name")
         self.assertEquals(enabled_deployments[0].enabled, True)
 
-    @patch("common.os.listdir", MagicMock(return_value=["aaa.war", "bbb.war", "ccc.txt", "ddd.jar"]))
+    @patch("os.listdir", MagicMock(return_value=["aaa.war", "bbb.war", "ccc.txt", "ddd.jar"]))
     def test_read_archive_files(self):
         tag = "5.0.0.1"
         path = "/tmp/deploy/" + tag
@@ -85,7 +85,7 @@ class CommonTests(unittest.TestCase):
         self.assertEqual(deployments[2].name, "ddd-5.0.0.1")
         self.assertEqual(deployments[2].runtime_name, "ddd.jar")
 
-    @patch("common.os.listdir", MagicMock(return_value=["aaa.war", "bbb.war", "ccc.txt", "ddd.jar"]))
+    @patch("os.listdir", MagicMock(return_value=["aaa.war", "bbb.war", "ccc.txt", "ddd.jar"]))
     def test_read_archive_files_filesSpecified_shouldReturnOnlySpecifiedFiles(self):
         tag = "5.0.0.1"
         path = "/tmp/deploy/" + tag
