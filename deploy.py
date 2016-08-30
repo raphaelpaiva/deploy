@@ -8,24 +8,6 @@ import jbosscli
 import rollback
 import common
 
-def read_archive_files(path, tag, files=[]):
-    """Scan path looking for archive files. Return a list of archives with tag applied to their names. runtime_name remains as the filename."""
-    archives = []
-
-    for file in os.listdir(path):
-        runtime_name = file.split(os.sep)[-1]
-        if (not files or runtime_name in files) and is_archive(file):
-            name = runtime_name.replace(".ear", "").replace(".war", "").replace(".jar", "") + "-" + tag
-            enabled = False
-            deployment = jbosscli.Deployment(name, runtime_name, enabled, path=path + file)
-            archives.append(deployment)
-
-    return archives
-
-def is_archive(file):
-    """Return true if file name ends with .ear, .war or .jar"""
-    return file.endswith('.ear') or file.endswith('.war') or file.endswith('.jar')
-
 def extract_tag(path):
     """Extract the name of the directory where the deployments are placed.
 
@@ -81,7 +63,7 @@ def generate_deploy_script(args):
     tag = extract_tag(path)
 
     controller = common.initialize_controller(args)
-    archives = read_archive_files(path, tag, files_filter)
+    archives = common.read_archive_files(path, tag, files_filter)
 
     header = ""
     undeploy_script = ""

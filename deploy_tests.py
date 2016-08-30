@@ -14,14 +14,6 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 
 class TestDeploy(unittest.TestCase):
 
-  def test_is_archive__warfile_shouldReturnTrue(self):
-      self.assertTrue(deploy.is_archive('aaa.war'))
-  def test_is_archive__notWarFle_shouldReturnFalse(self):
-      self.assertFalse(deploy.is_archive('aaa'))
-
-  def test_is_archive_file_jarFile_shouldReturnTrue(self):
-      self.assertTrue(deploy.is_archive('aaa.jar'))
-
   def test_extract_tag_fullPath_shouldReturnLastDir(self):
       path = os.path.join("/tmp", "deploy", "5.0.0-alfa-24")
       expected_tag="5.0.0-alfa-24"
@@ -38,38 +30,6 @@ class TestDeploy(unittest.TestCase):
       path = "5.0.0-alfa-24" + os.path.sep
       expected_tag="5.0.0-alfa-24"
       self.assertEqual(deploy.extract_tag(path), expected_tag)
-
-  @patch("deploy.os.listdir", MagicMock(return_value=["aaa.war", "bbb.war", "ccc.txt", "ddd.jar"]))
-  def test_read_archive_files(self):
-      tag = "5.0.0.1"
-      path = "/tmp/deploy/" + tag
-
-      deployments = deploy.read_archive_files(path, tag)
-
-      self.assertEqual(len(deployments), 3)
-      self.assertEqual(deployments[0].name, "aaa-5.0.0.1")
-      self.assertEqual(deployments[0].runtime_name, "aaa.war")
-
-      self.assertEqual(deployments[1].name, "bbb-5.0.0.1")
-      self.assertEqual(deployments[1].runtime_name, "bbb.war")
-
-      self.assertEqual(deployments[2].name, "ddd-5.0.0.1")
-      self.assertEqual(deployments[2].runtime_name, "ddd.jar")
-
-  @patch("deploy.os.listdir", MagicMock(return_value=["aaa.war", "bbb.war", "ccc.txt", "ddd.jar"]))
-  def test_read_archive_files_filesSpecified_shouldReturnOnlySpecifiedFiles(self):
-      tag = "5.0.0.1"
-      path = "/tmp/deploy/" + tag
-      files = ['aaa.war', 'bbb.war']
-
-      deployments = deploy.read_archive_files(path, tag, files)
-
-      self.assertEqual(len(deployments), 2)
-      self.assertEqual(deployments[0].name, "aaa-5.0.0.1")
-      self.assertEqual(deployments[0].runtime_name, "aaa.war")
-
-      self.assertEqual(deployments[1].name, "bbb-5.0.0.1")
-      self.assertEqual(deployments[1].runtime_name, "bbb.war")
 
   def test_generate_deploy_script_emptyParams_shouldReturnEmptyString(self):
       expected_script = ""
@@ -117,7 +77,7 @@ class TestDeploy(unittest.TestCase):
   @patch("deploy.common.read_from_file", MagicMock(return_value=["abc.war=group"]))
   @patch("os.path.isfile", MagicMock(return_value=True))
   @patch("deploy.rollback.persist_rollback_info", MagicMock(return_value=current_dir + os.sep + "rollback-info_test"))
-  @patch("deploy.read_archive_files", MagicMock(return_value=[Deployment("abc-v1.2.3", "abc.war", path=current_dir + os.sep + "v1.2.3" + os.sep + "abc.war")]))
+  @patch("deploy.common.read_archive_files", MagicMock(return_value=[Deployment("abc-v1.2.3", "abc.war", path=current_dir + os.sep + "v1.2.3" + os.sep + "abc.war")]))
   def test_generate_deploy_script_receiving_data_from_controller(self):
       expected_script="""\
 # Rollback information saved in {0}rollback-info_test
@@ -143,7 +103,7 @@ deploy {1} --runtime-name=abc.war --name=abc-v1.2.3 --server-groups=group\
   @patch("deploy.common.fetch_enabled_deployments", MagicMock(return_value=[]))
   @patch("deploy.common.read_from_file", MagicMock(return_value=["abc.war=group"]))
   @patch("os.path.isfile", MagicMock(return_value=True))
-  @patch("deploy.read_archive_files", MagicMock(return_value=[Deployment("abc-v1.2.3", "abc.war", path=current_dir + os.sep + "v1.2.3" + os.sep + "abc.war")]))
+  @patch("deploy.common.read_archive_files", MagicMock(return_value=[Deployment("abc-v1.2.3", "abc.war", path=current_dir + os.sep + "v1.2.3" + os.sep + "abc.war")]))
   def test_generate_deploy_script_noEnabledDeployments_shouldNotPrintRollbackHeader(self):
       expected_script="""
 
@@ -165,7 +125,7 @@ deploy {1} --runtime-name=abc.war --name=abc-v1.2.3 --server-groups=group\
       self.assertEqual(script, expected_script)
 
 
-  @patch("deploy.read_archive_files", MagicMock(return_value=[Deployment("system-v1.2.3", "system.war", path=current_dir + os.sep + "v1.2.3" + os.sep + "system.war")]))
+  @patch("deploy.common.read_archive_files", MagicMock(return_value=[Deployment("system-v1.2.3", "system.war", path=current_dir + os.sep + "v1.2.3" + os.sep + "system.war")]))
   def test_generate_deploy_script_skip_local_undeploy(self):
       expected_script = """
 

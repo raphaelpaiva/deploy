@@ -20,7 +20,7 @@ def verify(args):
 
     enabled_deployments = common.fetch_enabled_deployments(controller)
 
-    to_be_deployed = deploy.read_archive_files(path, tag)
+    to_be_deployed = common.read_archive_files(path, tag)
 
     if not to_be_deployed:
         return ("Deployment directory is empty!", INIT_ERROR_RET_CODE, "")

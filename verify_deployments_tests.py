@@ -11,7 +11,7 @@ deployment_app = Deployment("app-1.2.3", "app.war", enabled=True)
 deployment_ppa = Deployment("ppa-1.3.2", "ppa.war", enabled=True)
 
 class VerifyDeploymentsTests(unittest.TestCase):
-    @patch("verify_deployments.deploy.read_archive_files", MagicMock(return_value=[]))
+    @patch("verify_deployments.common.read_archive_files", MagicMock(return_value=[]))
     @patch("verify_deployments.common.fetch_enabled_deployments", MagicMock(return_value=[deployment_app, deployment_ppa]))
     @patch("verify_deployments.common.initialize_controller", MagicMock())
     @patch("verify_deployments.os.path.abspath", MagicMock(return_value="/tmp/deployment"))
@@ -24,7 +24,7 @@ class VerifyDeploymentsTests(unittest.TestCase):
         self.assertEquals(return_code, 2)
         self.assertEquals(output, "Deployment directory is empty!")
 
-    @patch("verify_deployments.deploy.read_archive_files", MagicMock(return_value=[deployment_app, deployment_ppa]))
+    @patch("verify_deployments.common.read_archive_files", MagicMock(return_value=[deployment_app, deployment_ppa]))
     @patch("verify_deployments.common.fetch_enabled_deployments", MagicMock(return_value=[deployment_app]))
     @patch("verify_deployments.common.initialize_controller", MagicMock())
     @patch("verify_deployments.os.path.abspath", MagicMock(return_value="/tmp/deployment"))
@@ -39,7 +39,7 @@ class VerifyDeploymentsTests(unittest.TestCase):
         self.assertEquals(output, "ERROR: some modules were not deployed:\n")
         self.assertEquals(stderr, "ppa-1.3.2")
 
-    @patch("verify_deployments.deploy.read_archive_files", MagicMock(return_value=[deployment_app]))
+    @patch("verify_deployments.common.read_archive_files", MagicMock(return_value=[deployment_app]))
     @patch("verify_deployments.common.fetch_enabled_deployments", MagicMock(return_value=[deployment_app, deployment_ppa]))
     @patch("verify_deployments.common.initialize_controller", MagicMock())
     @patch("verify_deployments.os.path.abspath", MagicMock(return_value="/tmp/deployment"))

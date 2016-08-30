@@ -1,4 +1,6 @@
-from jbosscli import Jbosscli
+from jbosscli import Jbosscli, Deployment
+
+import os
 
 def initialize_controller(args):
     """Try to instantiate and return the controller object. In case of errors, print it and return None."""
@@ -50,3 +52,22 @@ def read_from_file(path): #pragma: no cover
         lines = f.readlines()
 
     return lines
+
+
+def is_archive(file):
+    """Return true if file name ends with .ear, .war or .jar"""
+    return file.endswith('.ear') or file.endswith('.war') or file.endswith('.jar')
+
+def read_archive_files(path, tag, files=[]):
+    """Scan path looking for archive files. Return a list of archives with tag applied to their names. runtime_name remains as the filename."""
+    archives = []
+
+    for file in os.listdir(path):
+        runtime_name = file.split(os.sep)[-1]
+        if (not files or runtime_name in files) and is_archive(file):
+            name = runtime_name.replace(".ear", "").replace(".war", "").replace(".jar", "") + "-" + tag
+            enabled = False
+            deployment = Deployment(name, runtime_name, enabled, path=path + file)
+            archives.append(deployment)
+
+    return archives

@@ -7,6 +7,14 @@ import common
 from jbosscli import Deployment
 
 class CommonTests(unittest.TestCase):
+
+    def test_is_archive__warfile_shouldReturnTrue(self):
+        self.assertTrue(common.is_archive('aaa.war'))
+    def test_is_archive__notWarFle_shouldReturnFalse(self):
+        self.assertFalse(common.is_archive('aaa'))
+    def test_is_archive_file_jarFile_shouldReturnTrue(self):
+        self.assertTrue(common.is_archive('aaa.jar'))
+
     @patch("sys.stdout", new_callable=StringIO)
     def test_initialize_controller(self, mock_stdout):
         args = MagicMock()
@@ -40,6 +48,38 @@ class CommonTests(unittest.TestCase):
         self.assertEquals(len(enabled_deployments), 1)
         self.assertEquals(enabled_deployments[0].name, "name")
         self.assertEquals(enabled_deployments[0].enabled, True)
+
+    @patch("common.os.listdir", MagicMock(return_value=["aaa.war", "bbb.war", "ccc.txt", "ddd.jar"]))
+    def test_read_archive_files(self):
+        tag = "5.0.0.1"
+        path = "/tmp/deploy/" + tag
+
+        deployments = common.read_archive_files(path, tag)
+
+        self.assertEqual(len(deployments), 3)
+        self.assertEqual(deployments[0].name, "aaa-5.0.0.1")
+        self.assertEqual(deployments[0].runtime_name, "aaa.war")
+
+        self.assertEqual(deployments[1].name, "bbb-5.0.0.1")
+        self.assertEqual(deployments[1].runtime_name, "bbb.war")
+
+        self.assertEqual(deployments[2].name, "ddd-5.0.0.1")
+        self.assertEqual(deployments[2].runtime_name, "ddd.jar")
+
+    @patch("common.os.listdir", MagicMock(return_value=["aaa.war", "bbb.war", "ccc.txt", "ddd.jar"]))
+    def test_read_archive_files_filesSpecified_shouldReturnOnlySpecifiedFiles(self):
+        tag = "5.0.0.1"
+        path = "/tmp/deploy/" + tag
+        files = ['aaa.war', 'bbb.war']
+
+        deployments = common.read_archive_files(path, tag, files)
+
+        self.assertEqual(len(deployments), 2)
+        self.assertEqual(deployments[0].name, "aaa-5.0.0.1")
+        self.assertEqual(deployments[0].runtime_name, "aaa.war")
+
+        self.assertEqual(deployments[1].name, "bbb-5.0.0.1")
+        self.assertEqual(deployments[1].runtime_name, "bbb.war")
 
 if __name__ == "__main__":
     unittest.main()
