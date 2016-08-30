@@ -1,9 +1,7 @@
 #!/usr/bin/python
 
 import os
-import tempfile
 import time
-import argparse
 import cli_output
 import jbosscli
 import rollback
