@@ -4,7 +4,6 @@ import os
 import time
 import cli_output
 import jbosscli
-import rollback
 import common
 
 def read_server_group_mapping(mapping_file):
@@ -54,7 +53,7 @@ def generate_deploy_script(args):
     if controller:
         enabled_deployments = common.fetch_enabled_deployments(controller, archives)
 
-        rollback_filename_template = rollback.generate_rollback_filename_template(args.rollback_info_file_suffix)
+        rollback_filename_template = common.generate_rollback_filename_template(args.rollback_info_file_suffix)
         rollback_info_file = persist_rollback_info(enabled_deployments, rollback_filename_template)
         header = "# Rollback information saved in " + rollback_info_file if rollback_info_file else ""
 

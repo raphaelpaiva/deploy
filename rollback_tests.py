@@ -5,6 +5,7 @@ from mock import mock_open
 from mock import patch
 import unittest
 import rollback
+import common
 from jbosscli import Deployment
 
 class TestRollback(unittest.TestCase):
@@ -153,13 +154,13 @@ deploy  --runtime-name=abc.war --name=abc-v1.2.3 --server-groups=group\
 
   def test_generate_rollback_filename_template_emptySuffix_shouldReturnDefaultTemplate(self):
       expected_rollback_filename_template = "rollback-info_"
-      rollback_filename_template = rollback.generate_rollback_filename_template("")
+      rollback_filename_template = common.generate_rollback_filename_template("")
 
       self.assertEqual(rollback_filename_template, expected_rollback_filename_template)
 
   def test_generate_rollback_filename_template_providedSuffix_shouldReturnSuffixedTemplate(self):
       expected_rollback_filename_template = "rollback-info-suffix-ix_"
-      rollback_filename_template = rollback.generate_rollback_filename_template("suffix-ix")
+      rollback_filename_template = common.generate_rollback_filename_template("suffix-ix")
 
       self.assertEqual(rollback_filename_template, expected_rollback_filename_template)
 

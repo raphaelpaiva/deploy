@@ -47,19 +47,13 @@ def list_rollback_files(directory, rollback_filename_template="rollback-info_"):
 
     return glob.glob(rollback_files_pattern)
 
-def generate_rollback_filename_template(rollback_info_file_suffix):
-    if not rollback_info_file_suffix:
-        return "rollback-info_"
-    else:
-        return "rollback-info-{0}_".format(rollback_info_file_suffix)
-
 def generate_rollback_script(args):
     controller = common.initialize_controller(args)
 
     if not controller:
         return "# Cannot initialize the controller {0}. Rollback will not occour.".format(args.controller)
 
-    rollback_filename_template = generate_rollback_filename_template(args.rollback_info_file_suffix)
+    rollback_filename_template = common.generate_rollback_filename_template(args.rollback_info_file_suffix)
 
     rollback_file = get_rollback_file(rollback_filename_template=rollback_filename_template)
 

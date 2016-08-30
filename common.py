@@ -85,3 +85,9 @@ def extract_tag(path):
         path = path[:-1]
 
     return path.split(os.sep)[-1]
+
+def generate_rollback_filename_template(rollback_info_file_suffix):
+    if not rollback_info_file_suffix:
+        return "rollback-info_"
+    else:
+        return "rollback-info-{0}_".format(rollback_info_file_suffix)
