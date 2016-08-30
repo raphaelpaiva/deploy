@@ -9,6 +9,7 @@ from jbosscli import Deployment
 
 from mock import MagicMock
 from mock import patch
+from mock import ANY
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -54,12 +55,45 @@ class TestDeploy(unittest.TestCase):
 
       self.assertEqual(script, expected_script)
 
+  @patch("deploy.common.write_to_file", MagicMock())
+  def test_persist_rollback_info_emptyDeploymentList_shouldNotWriteFile(self):
+      deployments = []
+
+      deploy.persist_rollback_info(deployments)
+
+      deploy.common.write_to_file.assert_not_called()
+
+  @patch("deploy.common.write_to_file", MagicMock())
+  def test_persist_rollback_info_NullDeploymentList_shouldNotWriteFile(self):
+      deployments = None
+
+      deploy.persist_rollback_info(deployments)
+
+      deploy.common.write_to_file.assert_not_called()
+
+  @patch("deploy.common.write_to_file", MagicMock())
+  def test_persist_rollback_info_oneDeployment_shouldWriteFile(self):
+      deployments = [Deployment("abc", "abc.war", server_group="group")]
+
+      deploy.persist_rollback_info(deployments)
+
+      deploy.common.write_to_file.assert_called_with(ANY, "abc abc.war group\n")
+
+  @patch("deploy.common.write_to_file", MagicMock())
+  def test_persist_rollback_info_twoDeployments_shouldWriteFile(self):
+      deployments = [Deployment("abc", "abc.war", server_group="group"), Deployment("cba-v5.2.0", "cba.war", server_group="pourg")]
+
+      deploy.persist_rollback_info(deployments)
+
+      deploy.common.write_to_file.assert_called_with(ANY, "abc abc.war group\ncba-v5.2.0 cba.war pourg\n")
+
+
 # -- "Acceptance" Tests:
 
   @patch("deploy.common.fetch_enabled_deployments", MagicMock(return_value=[Deployment("abc-v1.0.0", "abc.war", server_group="group")]))
   @patch("deploy.common.read_from_file", MagicMock(return_value=["abc.war=group"]))
   @patch("os.path.isfile", MagicMock(return_value=True))
-  @patch("deploy.rollback.persist_rollback_info", MagicMock(return_value=current_dir + os.sep + "rollback-info_test"))
+  @patch("deploy.persist_rollback_info", MagicMock(return_value=current_dir + os.sep + "rollback-info_test"))
   @patch("deploy.common.read_archive_files", MagicMock(return_value=[Deployment("abc-v1.2.3", "abc.war", path=current_dir + os.sep + "v1.2.3" + os.sep + "abc.war")]))
   def test_generate_deploy_script_receiving_data_from_controller(self):
       expected_script="""\

@@ -1,29 +1,11 @@
 import os
 import glob
-import time
 
 from jbosscli import Deployment
 import common
 import cli_output
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
-
-def persist_rollback_info(deployments, rollback_filename_template="rollback-info_"):
-    """Write name, runtime_name and server group of all enabled deployments to be replaced to a file named rollback-info_<timestamp>."""
-    if not deployments:
-        return
-
-    rollback_info_file = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + rollback_filename_template + str(int(round(time.time() * 1000)))
-    deployment_line_template = "{0} {1} {2}\n"
-    rollback_info = ""
-
-    for deployment in deployments:
-        line = deployment_line_template.format(deployment.name, deployment.runtime_name, deployment.server_group)
-        rollback_info += line
-
-    common.write_to_file(rollback_info_file, rollback_info)
-
-    return rollback_info_file
 
 def get_latest_rollback_file(files, rollback_filename_template="rollback-info_"):
     """Given a list of rollback file names, return the latest file name based on the name's timestamp."""

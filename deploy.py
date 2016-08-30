@@ -2,6 +2,7 @@
 
 import os
 import tempfile
+import time
 import argparse
 import cli_output
 import jbosscli
@@ -56,7 +57,7 @@ def generate_deploy_script(args):
         enabled_deployments = common.fetch_enabled_deployments(controller, archives)
 
         rollback_filename_template = rollback.generate_rollback_filename_template(args.rollback_info_file_suffix)
-        rollback_info_file = rollback.persist_rollback_info(enabled_deployments, rollback_filename_template)
+        rollback_info_file = persist_rollback_info(enabled_deployments, rollback_filename_template)
         header = "# Rollback information saved in " + rollback_info_file if rollback_info_file else ""
 
         undeploy_script = cli_output.generate_undeploy_script(enabled_deployments)
@@ -69,6 +70,23 @@ def generate_deploy_script(args):
     deploy_script = cli_output.generate_deploy_script(archives)
 
     return "{0}\n{1}\n{2}".format(header, undeploy_script, deploy_script)
+
+def persist_rollback_info(deployments, rollback_filename_template="rollback-info_"):
+    """Write name, runtime_name and server group of all enabled deployments to be replaced to a file named rollback-info_<timestamp>."""
+    if not deployments:
+        return
+
+    rollback_info_file = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + rollback_filename_template + str(int(round(time.time() * 1000)))
+    deployment_line_template = "{0} {1} {2}\n"
+    rollback_info = ""
+
+    for deployment in deployments:
+        line = deployment_line_template.format(deployment.name, deployment.runtime_name, deployment.server_group)
+        rollback_info += line
+
+    common.write_to_file(rollback_info_file, rollback_info)
+
+    return rollback_info_file
 
 def generate_undeploy_script(args, archives=[]):
     if args.skip_undeploy:
