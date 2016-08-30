@@ -8,22 +8,6 @@ import jbosscli
 import rollback
 import common
 
-def extract_tag(path):
-    """Extract the name of the directory where the deployments are placed.
-
-    Arguments:
-    path -- the path to extract the name from.
-
-    This simply reads the leaf dir in a path.
-    "/path/to/deployment" returns "deployment"
-    "../relative/path/" returns "path"
-    "abc" returns "abc"
-    """
-    if path.endswith(os.sep):
-        path = path[:-1]
-
-    return path.split(os.sep)[-1]
-
 def read_server_group_mapping(mapping_file):
     """Given a mapping file path, read it and return a dict with its contents.
 
@@ -60,7 +44,7 @@ def generate_deploy_script(args):
     undeploy_tag = args.undeploy_tag
     mapping_file = args.server_group_mapping_file
 
-    tag = extract_tag(path)
+    tag = common.extract_tag(path)
 
     controller = common.initialize_controller(args)
     archives = common.read_archive_files(path, tag, files_filter)

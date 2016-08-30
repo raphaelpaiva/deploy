@@ -3,6 +3,8 @@ from mock import MagicMock
 from mock import patch
 from StringIO import StringIO
 
+import os
+
 import common
 from jbosscli import Deployment
 
@@ -14,6 +16,23 @@ class CommonTests(unittest.TestCase):
         self.assertFalse(common.is_archive('aaa'))
     def test_is_archive_file_jarFile_shouldReturnTrue(self):
         self.assertTrue(common.is_archive('aaa.jar'))
+
+    def test_extract_tag_fullPath_shouldReturnLastDir(self):
+        path = os.path.join("/tmp", "deploy", "5.0.0-alfa-24")
+        expected_tag="5.0.0-alfa-24"
+        self.assertEqual(common.extract_tag(path), expected_tag)
+    def test_extract_tag_fullPathTrailingSlash_shouldReturnLastDir(self):
+        path = os.path.join("/tmp", "deploy", "5.0.0-alfa-24") + os.path.sep
+        expected_tag="5.0.0-alfa-24"
+        self.assertEqual(common.extract_tag(path), expected_tag)
+    def test_extract_tag_onlyDirName_shouldReturnDirName(self):
+        path = "5.0.0-alfa-24"
+        expected_tag="5.0.0-alfa-24"
+        self.assertEqual(common.extract_tag(path), expected_tag)
+    def test_extract_tag_onlyDirNameWithTrailingSlash_shouldReturnDirName(self):
+        path = "5.0.0-alfa-24" + os.path.sep
+        expected_tag="5.0.0-alfa-24"
+        self.assertEqual(common.extract_tag(path), expected_tag)
 
     @patch("sys.stdout", new_callable=StringIO)
     def test_initialize_controller(self, mock_stdout):

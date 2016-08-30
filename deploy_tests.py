@@ -14,23 +14,6 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 
 class TestDeploy(unittest.TestCase):
 
-  def test_extract_tag_fullPath_shouldReturnLastDir(self):
-      path = os.path.join("/tmp", "deploy", "5.0.0-alfa-24")
-      expected_tag="5.0.0-alfa-24"
-      self.assertEqual(deploy.extract_tag(path), expected_tag)
-  def test_extract_tag_fullPathTrailingSlash_shouldReturnLastDir(self):
-      path = os.path.join("/tmp", "deploy", "5.0.0-alfa-24") + os.path.sep
-      expected_tag="5.0.0-alfa-24"
-      self.assertEqual(deploy.extract_tag(path), expected_tag)
-  def test_extract_tag_onlyDirName_shouldReturnDirName(self):
-      path = "5.0.0-alfa-24"
-      expected_tag="5.0.0-alfa-24"
-      self.assertEqual(deploy.extract_tag(path), expected_tag)
-  def test_extract_tag_onlyDirNameWithTrailingSlash_shouldReturnDirName(self):
-      path = "5.0.0-alfa-24" + os.path.sep
-      expected_tag="5.0.0-alfa-24"
-      self.assertEqual(deploy.extract_tag(path), expected_tag)
-
   def test_generate_deploy_script_emptyParams_shouldReturnEmptyString(self):
       expected_script = ""
       args = MagicMock()

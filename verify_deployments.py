@@ -1,7 +1,6 @@
 import os
 
 import common
-import deploy
 
 OK_RET_CODE         = 0
 ERROR_RET_CODE      = 1
@@ -9,7 +8,7 @@ INIT_ERROR_RET_CODE = 2
 
 def verify(args):
     path = os.path.abspath(args.path) + os.sep
-    tag = deploy.extract_tag(path)
+    tag = common.extract_tag(path)
 
     controller = common.initialize_controller(args)
     if controller is None:

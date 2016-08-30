@@ -40,7 +40,6 @@ def fetch_enabled_deployments(controller, archives=[]):
 
     return enabled_deployments
 
-
 def write_to_file(file, content): #pragma: no cover
     """Write content to file."""
     with open(file, "w") as f:
@@ -71,3 +70,19 @@ def read_archive_files(path, tag, files=[]):
             archives.append(deployment)
 
     return archives
+
+def extract_tag(path):
+    """Extract the name of the directory where the deployments are placed.
+
+    Arguments:
+    path -- the path to extract the name from.
+
+    This simply reads the leaf dir in a path.
+    "/path/to/deployment" returns "deployment"
+    "../relative/path/" returns "path"
+    "abc" returns "abc"
+    """
+    if path.endswith(os.sep):
+        path = path[:-1]
+
+    return path.split(os.sep)[-1]
