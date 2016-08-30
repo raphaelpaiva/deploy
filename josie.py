@@ -102,7 +102,7 @@ def do_deploy(args):
     print(deploy.generate_deploy_script(args))
 
 def do_rollback(args):
-    print(rollback.generate_rollback_script(args))
+    print(rollback.generate_rollback_script(args, os.path.dirname(os.path.abspath(__file__))))
 
 def do_cleanup(args):
     print(cleanup.generate_cleanup_script(args))

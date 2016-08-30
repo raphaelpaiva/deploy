@@ -1,11 +1,14 @@
 import os
 import tempfile
+
 from mock import MagicMock
 from mock import mock_open
 from mock import patch
+
 import unittest
 import rollback
 import common
+
 from jbosscli import Deployment
 
 class TestRollback(unittest.TestCase):
@@ -80,8 +83,8 @@ class TestRollback(unittest.TestCase):
       self.assertEqual(archive.runtime_name, "abc.war")
       self.assertEqual(archive.server_group, "group")
 
+  @patch("__main__.rollback.get_latest_rollback_file", MagicMock(return_value="rollback-info_test"))
   @patch("rollback.common.read_from_file", MagicMock(return_value=["abc-v1.2.3 abc.war group"]))
-  @patch("rollback.get_latest_rollback_file", MagicMock(return_value="rollback-info_test"))
   @patch("rollback.common.fetch_enabled_deployments", MagicMock(return_value=[Deployment("abc-v1.0.0", "abc.war", server_group="group")]))
   @patch("rollback.common.initialize_controller", MagicMock())
   def test_generate_rollback_script(self):
