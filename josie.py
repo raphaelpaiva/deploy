@@ -12,6 +12,8 @@ import cleanup
 import verify_deployments
 import http_test
 
+current_dir = os.path.dirname(os.path.abspath(__file__))
+
 def main():
     args = parse_args()
     args.func(args)
@@ -99,10 +101,10 @@ def configure_http_test_parser(subparsers):
     http_test_parser.set_defaults(func=do_http_test)
 
 def do_deploy(args):
-    print(deploy.generate_deploy_script(args))
+    print(deploy.generate_deploy_script(args, current_dir))
 
 def do_rollback(args):
-    print(rollback.generate_rollback_script(args, os.path.dirname(os.path.abspath(__file__))))
+    print(rollback.generate_rollback_script(args, current_dir))
 
 def do_cleanup(args):
     print(cleanup.generate_cleanup_script(args))

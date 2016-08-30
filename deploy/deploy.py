@@ -34,7 +34,7 @@ def map_server_groups(archives, mapping):
         if archive.server_group is None and archive.runtime_name in mapping:
             archive.server_group = jbosscli.ServerGroup(mapping[archive.runtime_name], None)
 
-def generate_deploy_script(args):
+def generate_deploy_script(args, rollback_file_dir=None):
     path = os.path.abspath(args.path) + os.sep
     files_filter = args.files
     undeploy_pattern = args.undeploy_pattern
@@ -54,7 +54,7 @@ def generate_deploy_script(args):
         enabled_deployments = common.fetch_enabled_deployments(controller, archives)
 
         rollback_filename_template = common.generate_rollback_filename_template(args.rollback_info_file_suffix)
-        rollback_info_file = persist_rollback_info(enabled_deployments, rollback_filename_template)
+        rollback_info_file = persist_rollback_info(enabled_deployments, rollback_filename_template, rollback_file_dir)
         header = "# Rollback information saved in " + rollback_info_file if rollback_info_file else ""
 
         undeploy_script = cli_output.generate_undeploy_script(enabled_deployments)
@@ -68,12 +68,14 @@ def generate_deploy_script(args):
 
     return "{0}\n{1}\n{2}".format(header, undeploy_script, deploy_script)
 
-def persist_rollback_info(deployments, rollback_filename_template="rollback-info_"):
+def persist_rollback_info(deployments, rollback_filename_template="rollback-info_", rollback_file_dir=None):
     """Write name, runtime_name and server group of all enabled deployments to be replaced to a file named rollback-info_<timestamp>."""
     if not deployments:
         return
 
-    rollback_info_file = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + rollback_filename_template + str(int(round(time.time() * 1000)))
+    directory = rollback_file_dir if rollback_file_dir else os.path.dirname(os.path.abspath(__file__))
+
+    rollback_info_file = directory + os.path.sep + rollback_filename_template + str(int(round(time.time() * 1000)))
     deployment_line_template = "{0} {1} {2}\n"
     rollback_info = ""
 

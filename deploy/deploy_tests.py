@@ -91,7 +91,7 @@ class TestDeploy(unittest.TestCase):
   @patch("deploy.common.fetch_enabled_deployments", MagicMock(return_value=[Deployment("abc-v1.0.0", "abc.war", server_group="group")]))
   @patch("deploy.common.read_from_file", MagicMock(return_value=["abc.war=group"]))
   @patch("os.path.isfile", MagicMock(return_value=True))
-  @patch("deploy.persist_rollback_info", MagicMock(return_value=current_dir + os.sep + "rollback-info_test"))
+  @patch("__main__.deploy.persist_rollback_info", MagicMock(return_value=current_dir + os.sep + "rollback-info_test"))
   @patch("deploy.common.read_archive_files", MagicMock(return_value=[Deployment("abc-v1.2.3", "abc.war", path=current_dir + os.sep + "v1.2.3" + os.sep + "abc.war")]))
   def test_generate_deploy_script_receiving_data_from_controller(self):
       expected_script="""\
