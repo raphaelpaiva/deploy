@@ -5,14 +5,17 @@ import jbosscli
 OK_RET_CODE = 0
 ERROR_RET_CODE = 1
 
+
 def generate_test_list(args):
     controller = jbosscli.Jbosscli(args.controller, args.auth)
 
-    base_url = args.base_url if args.base_url else args.controller.split(":")[0]
+    base_url = args.base_url if args.base_url \
+        else args.controller.split(":")[0]
 
     assigned_deployments = controller.get_assigned_deployments()
 
-    modules = [x for x in assigned_deployments if x.enabled and ".jar" not in x.runtime_name]
+    modules = [x for x in assigned_deployments if x.enabled and
+               ".jar" not in x.runtime_name]
 
     error_modules = []
 
