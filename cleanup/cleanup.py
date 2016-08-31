@@ -2,6 +2,7 @@
 
 import common
 
+
 def generate_cleanup_script(args):
     controller = args.controller
     auth = args.auth
@@ -10,11 +11,14 @@ def generate_cleanup_script(args):
     cli = common.initialize_controller(args)
 
     if not cli:
-        return "# Could not initialize controller {0}. Cleanup will not occour.".format(controller)
+        return "# Could not initialize controller {0}. \
+Cleanup will not occour.".format(controller)
 
     not_enabled_deployments = fetch_not_enabled_deployments(cli)
 
-    deployments_by_runtime_name = map_deployments_by_runtime_name(not_enabled_deployments)
+    deployments_by_runtime_name = map_deployments_by_runtime_name(
+        not_enabled_deployments
+    )
 
     script = ""
 
@@ -22,9 +26,13 @@ def generate_cleanup_script(args):
         if len(item) > num_deployments_to_keep:
             sorted_deployments = sorted(item, key=lambda x: x.name)
             for d in sorted_deployments[0:len(item) - num_deployments_to_keep]:
-                script += "\nundeploy {0}{1}".format(d.name, " --all-relevant-server-groups" if cli.domain else "")
+                script += "\nundeploy {0}{1}".format(
+                    d.name,
+                    " --all-relevant-server-groups" if cli.domain else ""
+                )
 
     return script
+
 
 def map_deployments_by_runtime_name(deployments):
     """Aggregate deployments by their runtime name."""
@@ -38,8 +46,11 @@ def map_deployments_by_runtime_name(deployments):
 
     return deployments_by_runtime_name
 
+
 def fetch_not_enabled_deployments(controller):
-    """Filter deployments that are not enabled from all deployments in the controller."""
+    """Filter deployments that are not enabled from all deployments in
+    the controller.
+    """
     all_deployments = controller.get_deployments()
 
     not_enabled = [x for x in all_deployments if not x.enabled]
