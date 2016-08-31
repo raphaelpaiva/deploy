@@ -14,5 +14,6 @@ install:
   - python -m pip install -r requirements.txt
 
 script:
-  - chmod a+x test.sh
+  - chmod a+x test.sh pep.sh
+  - ./pep.sh
   - ./test.sh
