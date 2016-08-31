@@ -2,9 +2,10 @@ import os
 
 import common
 
-OK_RET_CODE         = 0
-ERROR_RET_CODE      = 1
+OK_RET_CODE = 0
+ERROR_RET_CODE = 1
 INIT_ERROR_RET_CODE = 2
+
 
 def verify(args):
     path = os.path.abspath(args.path) + os.sep
@@ -12,7 +13,8 @@ def verify(args):
 
     controller = common.initialize_controller(args)
     if controller is None:
-        return ("# Cannot reach controller {0}.".format(args.controller), INIT_ERROR_RET_CODE, "")
+        return ("# Cannot reach controller {0}.".format(args.controller),
+                INIT_ERROR_RET_CODE, "")
 
     output = ""
     err = ""
@@ -27,7 +29,8 @@ def verify(args):
     deployed_names = {x.name for x in enabled_deployments}
     to_be_deployed_names = {x.name for x in to_be_deployed}
 
-    everything_deployed = verify_deployments(to_be_deployed_names, deployed_names)
+    everything_deployed = verify_deployments(to_be_deployed_names,
+                                             deployed_names)
 
     return_code = None
 
@@ -41,6 +44,7 @@ def verify(args):
         return_code = ERROR_RET_CODE
 
     return (output, return_code, err)
+
 
 def verify_deployments(to_be, deployed):
     return to_be.issubset(deployed)
