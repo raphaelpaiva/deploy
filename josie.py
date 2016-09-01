@@ -1,10 +1,17 @@
+"""josie.py
+
+This module is the entry-point (main) module for the josie scripts.
+It's role is to parse arguments and call each specific module according to the
+command-line arugments passed.
+
+"""
+
 from __future__ import print_function
 
 import os
 import argparse
 import tempfile
-from sys import exit
-from sys import stderr
+import sys
 
 import rollback
 import deploy
@@ -12,15 +19,19 @@ import cleanup
 import verify_deployments
 import http_test
 
-current_dir = os.path.dirname(os.path.abspath(__file__))
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 def main():
+    """Parse arguments and call the requested command."""
+
     args = parse_args()
     args.func(args)
 
 
 def parse_args():
+    """Configure the parser for each module and parse the arguments."""
+
     parser = argparse.ArgumentParser(
         description="Generates [un]deploy commands which you can " +
         "pipe through jboss-cli script."
@@ -53,7 +64,9 @@ def parse_args():
 
 
 def configure_deploy_parser(subparsers):
-    default_server_group_mapping_file = tempfile.gettempdir() + os.sep + \
+    """Configure the argument parser for the deploy module."""
+
+    default_sv_group_mapping_file = tempfile.gettempdir() + os.sep + \
         "server-group-mapping.properties"
 
     deploy_parser = subparsers.add_parser(
@@ -92,7 +105,7 @@ def configure_deploy_parser(subparsers):
         "--server-group-mapping-file",
         help="A file containing a runtime-name=server-group mapping. " +
         "Defaults to /tmp/server-group-mapping.properties",
-        default=default_server_group_mapping_file
+        default=default_sv_group_mapping_file
     )
 
     deploy_parser.add_argument(
@@ -113,6 +126,8 @@ def configure_deploy_parser(subparsers):
 
 
 def configure_rollback_parser(subparsers):
+    """Configure the argument parser for the rollback module."""
+
     rollback_parser = subparsers.add_parser(
         "rollback",
         description="Rollbacks the last deploy made in a controller."
@@ -129,6 +144,8 @@ def configure_rollback_parser(subparsers):
 
 
 def configure_cleanup_parser(subparsers):
+    """Configure the argument parser for the cleanup module."""
+
     cleanup_parser = subparsers.add_parser(
         "cleanup",
         description="Generates jboss-cli commands to remove disabled " +
@@ -147,6 +164,8 @@ def configure_cleanup_parser(subparsers):
 
 
 def configure_list_parser(subparsers):
+    """Configure the argument parser for the verify_deployments module."""
+
     list_parser = subparsers.add_parser(
         "verify-deployments",
         description="verifies deployments"
@@ -162,6 +181,8 @@ def configure_list_parser(subparsers):
 
 
 def configure_http_test_parser(subparsers):
+    """Configure the argument parser for the http_test module."""
+
     http_test_parser = subparsers.add_parser(
         "http-test",
         description="Teste the context root of deployed modules for http " +
@@ -179,11 +200,11 @@ def configure_http_test_parser(subparsers):
 
 
 def do_deploy(args):
-    print(deploy.generate_deploy_script(args, current_dir))
+    print(deploy.generate_deploy_script(args, CURRENT_DIR))
 
 
 def do_rollback(args):
-    print(rollback.generate_rollback_script(args, current_dir))
+    print(rollback.generate_rollback_script(args, CURRENT_DIR))
 
 
 def do_cleanup(args):
@@ -199,6 +220,15 @@ def do_http_test(args):
 
 
 def run(func, args):
+    """Run `func` with `args` as arguments and parse the result.
+
+    This expects that `func` returns a tulpe containing
+    (output, ret_code, err), where:
+        * output is the text to be printed to stdout.
+        * ret_code is the exit code to be returned by josie.py.
+        * err is the text to be printed to stderr.
+    """
+
     result = func(args)
 
     output = result[0]
@@ -206,8 +236,8 @@ def run(func, args):
     err = result[2]
 
     print(output)
-    print(err, file=stderr)
-    exit(ret_code)
+    print(err, file=sys.stderr)
+    sys.exit(ret_code)
 
 if __name__ == "__main__":
     main()
