@@ -124,6 +124,12 @@ def configure_deploy_parser(subparsers):
         default=[]
     )
 
+    deploy_parser.add_argument(
+        "--restart",
+        action="store_true",
+        help="Stop servers prior to the deploy process and start them after."
+    )
+
 
 def configure_rollback_parser(subparsers):
     """Configure the argument parser for the rollback module."""

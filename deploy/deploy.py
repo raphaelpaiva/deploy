@@ -58,6 +58,8 @@ def generate_deploy_script(args, rollback_file_dir=None):
     header = ""
     undeploy_script = ""
 
+    domain_mode = controller and controller.domain
+
     if controller:
         enabled_deployments = common.fetch_enabled_deployments(
             controller,
@@ -80,12 +82,17 @@ def generate_deploy_script(args, rollback_file_dir=None):
             enabled_deployments
         )
 
-        if controller.domain:
+        if domain_mode:
             map_deployments_server_groups(archives, mapping_file)
+            if args.restart:
+                header += "\n:stop-servers()"
     else:
         undeploy_script = generate_undeploy_script(args, archives)
 
     deploy_script = cli_output.generate_deploy_script(archives)
+
+    if args.restart:
+        deploy_script += "\n:start-servers()"
 
     return "{0}\n{1}\n{2}".format(header, undeploy_script, deploy_script)
 

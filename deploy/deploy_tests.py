@@ -117,6 +117,7 @@ deploy {1} --runtime-name=abc.war --name=abc-v1.2.3 --server-groups=group\
         args.path = current_dir + os.sep + "v1.2.3"
         args.undeploy_pattern = None
         args.undeploy_tag = None
+        args.restart = False
 
         mock_controller = MagicMock()
         mock_controller.domain = True
@@ -127,6 +128,40 @@ deploy {1} --runtime-name=abc.war --name=abc-v1.2.3 --server-groups=group\
         script = deploy.generate_deploy_script(args)
 
         self.assertEqual(script, expected_script)
+
+    @patch("deploy.common.fetch_enabled_deployments", MagicMock(return_value=[Deployment("abc-v1.0.0", "abc.war", server_group="group")]))
+    @patch("deploy.common.read_from_file", MagicMock(return_value=["abc.war=group"]))
+    @patch("os.path.isfile", MagicMock(return_value=True))
+    @patch("__main__.deploy.persist_rollback_info", MagicMock(return_value=current_dir + os.sep + "rollback-info_test"))
+    @patch("deploy.common.read_archive_files", MagicMock(return_value=[Deployment("abc-v1.2.3", "abc.war", path=current_dir + os.sep + "v1.2.3" + os.sep + "abc.war")]))
+    def test_generate_deploy_script_withRestartOption_ShouldPrintStopStart(self):
+        expected_script = """\
+# Rollback information saved in {0}rollback-info_test
+:stop-servers()
+
+undeploy abc-v1.0.0 --keep-content --all-relevant-server-groups
+
+deploy {1} --runtime-name=abc.war --name=abc-v1.2.3 --server-groups=group
+:start-servers()\
+""".format(current_dir + os.sep,
+           current_dir + os.sep + "v1.2.3" + os.sep + "abc.war")
+
+        args = MagicMock()
+        args.path = current_dir + os.sep + "v1.2.3"
+        args.undeploy_pattern = None
+        args.undeploy_tag = None
+        args.restart = True
+
+        mock_controller = MagicMock()
+        mock_controller.domain = True
+        deploy.common.initialize_controller = MagicMock(
+            return_value=mock_controller
+        )
+
+        script = deploy.generate_deploy_script(args)
+
+        self.assertEqual(script, expected_script)
+
 
     @patch("deploy.common.fetch_enabled_deployments",
            MagicMock(return_value=[]))
@@ -151,6 +186,7 @@ deploy {1} --runtime-name=abc.war --name=abc-v1.2.3 --server-groups=group\
         args.path = current_dir + os.sep + "v1.2.3"
         args.undeploy_pattern = None
         args.undeploy_tag = None
+        args.restart = False
 
         mock_controller = MagicMock()
         mock_controller.domain = True
@@ -182,6 +218,7 @@ deploy {0}system.war --runtime-name=system.war --name=system-v1.2.3\
         args.path = current_dir + os.sep + "v1.2.3"
         args.undeploy_pattern = None
         args.undeploy_tag = "sometag"
+        args.restart = False
 
         deploy.common.initialize_controller = MagicMock(return_value=None)
 
