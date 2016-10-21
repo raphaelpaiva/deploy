@@ -1,12 +1,25 @@
 #!/usr/bin/python
+"""Perform cleanup of existing disabled deployments.
+
+Scan the disabled deployments, sorting by lexicographical order,
+undeploying the all disabled deployments, but the last n, defined by
+`deployments_to_keep` argument, which defaults to 2.
+
+This module depends upon a connection with the controller.
+If it is not available, the script will return an error message in the
+form of a jboss-cli script comment line.
+"""
 
 import common
 
 
 def generate_cleanup_script(args):
+    """Generate and return the jboss-cli script to undeploy disabled
+    deployments.
+    """
+
     controller = args.controller
-    auth = args.auth
-    num_deployments_to_keep = args.deployments_to_keep
+    deployments_to_keep = args.deployments_to_keep
 
     cli = common.initialize_controller(args)
 
@@ -23,11 +36,11 @@ Cleanup will not occour.".format(controller)
     script = ""
 
     for item in deployments_by_runtime_name.values():
-        if len(item) > num_deployments_to_keep:
+        if len(item) > deployments_to_keep:
             sorted_deployments = sorted(item, key=lambda x: x.name)
-            for d in sorted_deployments[0:len(item) - num_deployments_to_keep]:
+            for dep in sorted_deployments[0:len(item) - deployments_to_keep]:
                 script += "\nundeploy {0}{1}".format(
-                    d.name,
+                    dep.name,
                     " --all-relevant-server-groups" if cli.domain else ""
                 )
 
@@ -38,11 +51,11 @@ def map_deployments_by_runtime_name(deployments):
     """Aggregate deployments by their runtime name."""
     deployments_by_runtime_name = {}
 
-    for d in deployments:
-        if d.runtime_name not in deployments_by_runtime_name:
-            deployments_by_runtime_name[d.runtime_name] = []
+    for dep in deployments:
+        if dep.runtime_name not in deployments_by_runtime_name:
+            deployments_by_runtime_name[dep.runtime_name] = []
 
-        deployments_by_runtime_name[d.runtime_name].append(d)
+        deployments_by_runtime_name[dep.runtime_name].append(dep)
 
     return deployments_by_runtime_name
 
