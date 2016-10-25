@@ -91,7 +91,7 @@ def generate_deploy_script(args, rollback_file_dir=None):
 
     deploy_script = cli_output.generate_deploy_script(archives)
 
-    if args.restart:
+    if args.restart and controller and controller.domain:
         deploy_script += "\n:start-servers()"
 
     return "{0}\n{1}\n{2}".format(header, undeploy_script, deploy_script)
