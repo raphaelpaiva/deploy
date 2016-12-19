@@ -24,7 +24,10 @@ def read_server_group_mapping(mapping_file):
     if os.path.isfile(mapping_file):
         lines = common.read_from_file(mapping_file)
         for line in lines:
-            (runtime_name, server_group) = line.strip().split("=")
+            raw_mapping = line.strip().split("=")
+            if len(raw_mapping) < 2:
+                continue
+            (runtime_name, server_group) = raw_mapping
             mapping[runtime_name] = server_group
 
     return mapping

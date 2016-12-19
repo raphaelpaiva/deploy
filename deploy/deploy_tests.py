@@ -95,6 +95,57 @@ class TestDeploy(unittest.TestCase):
             "abc abc.war group\ncba-v5.2.0 cba.war pourg\n"
         )
 
+    @patch("deploy.os.path.isfile", MagicMock(return_value=True))
+    @patch("deploy.common.read_from_file", MagicMock(return_value=["abc.war=group"]))
+    def test_read_server_group_mapping_OneMapping_ShouldReturnValidMap(self):
+        expected_mapping = {
+            "abc.war": "group"
+        }
+
+        mapping = deploy.read_server_group_mapping("dummy_file")
+        self.assertEqual(mapping, expected_mapping)
+
+    @patch("deploy.os.path.isfile", MagicMock(return_value=True))
+    @patch("deploy.common.read_from_file", MagicMock(return_value=["abc.war=group\n"]))
+    def test_read_server_group_mapping_OneMappingWithoutStrip_ShouldReturnValidMap(self):
+        expected_mapping = {
+            "abc.war": "group"
+        }
+
+        mapping = deploy.read_server_group_mapping("dummy_file")
+        self.assertEqual(mapping, expected_mapping)
+
+    @patch("deploy.os.path.isfile", MagicMock(return_value=True))
+    @patch("deploy.common.read_from_file", MagicMock(return_value=["abc.war=group", "cba.war=other"]))
+    def test_read_server_group_mapping_TwoMappings_ShouldReturnValidMap(self):
+        expected_mapping = {
+            "abc.war": "group",
+            "cba.war": "other"
+        }
+
+        mapping = deploy.read_server_group_mapping("dummy_file")
+        self.assertEqual(mapping, expected_mapping)
+
+    @patch("deploy.os.path.isfile", MagicMock(return_value=True))
+    @patch("deploy.common.read_from_file", MagicMock(return_value=["abc.war=group", ""]))
+    def test_read_server_group_mapping_TrailingLine_ShouldReturnValidMap(self):
+        expected_mapping = {
+            "abc.war": "group"
+        }
+
+        mapping = deploy.read_server_group_mapping("dummy_file")
+        self.assertEqual(mapping, expected_mapping)
+
+    @patch("deploy.os.path.isfile", MagicMock(return_value=True))
+    @patch("deploy.common.read_from_file", MagicMock(return_value=["abc.war=group", "", "", "cba.war=other", ""]))
+    def test_read_server_group_mapping_BlankLines_ShouldReturnValidMap(self):
+        expected_mapping = {
+            "abc.war": "group",
+            "cba.war": "other"
+        }
+
+        mapping = deploy.read_server_group_mapping("dummy_file")
+        self.assertEqual(mapping, expected_mapping)
 
 # -- "Acceptance" Tests:
 
