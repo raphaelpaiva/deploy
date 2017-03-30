@@ -4,6 +4,7 @@ import os
 import unittest
 import deploy
 from jbosscli import Deployment
+from jbosscli import ServerGroup
 
 from mock import MagicMock
 from mock import patch
@@ -48,7 +49,11 @@ class TestDeploy(unittest.TestCase):
         args.undeploy_pattern = None
         args.undeploy_tag = None
 
-        archives = [Deployment("system-v1.2.3", "system.war")]
+        archives = [
+            Deployment(
+                {"name": "system-v1.2.3", "runtime-name": "system.war", "enabled": True},
+                None)
+        ]
 
         script = deploy.generate_undeploy_script(args, archives)
 
@@ -72,7 +77,24 @@ class TestDeploy(unittest.TestCase):
 
     @patch("deploy.common.write_to_file", MagicMock())
     def test_persist_rollback_info_oneDeployment_shouldWriteFile(self):
-        deployments = [Deployment("abc", "abc.war", server_group="group")]
+        deployments = [
+            Deployment(
+                {
+                    "name": "abc",
+                    "runtime-name": "abc.war",
+                    "enabled": True
+                },
+                server_group=ServerGroup(
+                    {
+                        "name": "group",
+                        "profile": "",
+                        "socket-binding-group": "",
+                        "socket-binding-port-offset": "",
+                        "deployment": {}
+                    }
+                )
+            )
+        ]
 
         deploy.persist_rollback_info(deployments)
 
@@ -84,8 +106,38 @@ class TestDeploy(unittest.TestCase):
     @patch("deploy.common.write_to_file", MagicMock())
     def test_persist_rollback_info_twoDeployments_shouldWriteFile(self):
         deployments = [
-            Deployment("abc", "abc.war", server_group="group"),
-            Deployment("cba-v5.2.0", "cba.war", server_group="pourg")
+            Deployment(
+                {
+                    "name": "abc",
+                    "runtime-name": "abc.war",
+                    "enabled": True
+                },
+                server_group=ServerGroup(
+                    {
+                        "name": "group",
+                        "profile": "",
+                        "socket-binding-group": "",
+                        "socket-binding-port-offset": "",
+                        "deployment": {}
+                    }
+                )
+            ),
+            Deployment(
+                {
+                    "name": "cba-v5.2.0",
+                    "runtime-name": "cba.war",
+                    "enabled": True
+                },
+                server_group=ServerGroup(
+                    {
+                        "name": "pourg",
+                        "profile": "",
+                        "socket-binding-group": "",
+                        "socket-binding-port-offset": "",
+                        "deployment": {}
+                    }
+                )
+            )
         ]
 
         deploy.persist_rollback_info(deployments)
@@ -149,11 +201,11 @@ class TestDeploy(unittest.TestCase):
 
 # -- "Acceptance" Tests:
 
-    @patch("deploy.common.fetch_enabled_deployments", MagicMock(return_value=[Deployment("abc-v1.0.0", "abc.war", server_group="group")]))
+    @patch("deploy.common.fetch_enabled_deployments", MagicMock(return_value=[Deployment({"name": "abc-v1.0.0", "runtime-name": "abc.war", "enabled": True}, MagicMock(name="group"))]))
     @patch("deploy.common.read_from_file", MagicMock(return_value=["abc.war=group"]))
     @patch("os.path.isfile", MagicMock(return_value=True))
     @patch("__main__.deploy.persist_rollback_info", MagicMock(return_value=current_dir + os.sep + "rollback-info_test"))
-    @patch("deploy.common.read_archive_files", MagicMock(return_value=[Deployment("abc-v1.2.3", "abc.war", path=current_dir + os.sep + "v1.2.3" + os.sep + "abc.war")]))
+    @patch("deploy.common.read_archive_files", MagicMock(return_value=[Deployment({"name": "abc-v1.2.3", "runtime-name": "abc.war", "enabled": False}, None)]))
     def test_generate_deploy_script_receiving_data_from_controller(self):
         expected_script = """\
 # Rollback information saved in {0}rollback-info_test
@@ -180,11 +232,11 @@ deploy {1} --runtime-name=abc.war --name=abc-v1.2.3 --server-groups=group\
 
         self.assertEqual(script, expected_script)
 
-    @patch("deploy.common.fetch_enabled_deployments", MagicMock(return_value=[Deployment("abc-v1.0.0", "abc.war", server_group="group")]))
+    @patch("deploy.common.fetch_enabled_deployments", MagicMock(return_value=[Deployment({"name": "abc-v1.0.0", "runtime-name": "abc.war", "enabled": True}, server_group=MagicMock(name="group"))]))
     @patch("deploy.common.read_from_file", MagicMock(return_value=["abc.war=group"]))
     @patch("os.path.isfile", MagicMock(return_value=True))
     @patch("__main__.deploy.persist_rollback_info", MagicMock(return_value=current_dir + os.sep + "rollback-info_test"))
-    @patch("deploy.common.read_archive_files", MagicMock(return_value=[Deployment("abc-v1.2.3", "abc.war", path=current_dir + os.sep + "v1.2.3" + os.sep + "abc.war")]))
+    @patch("deploy.common.read_archive_files", MagicMock(return_value=[Deployment({"name": "abc-v1.2.3", "runtime-name": "abc.war", "enabled": False}, None)]))
     def test_generate_deploy_script_withRestartOption_ShouldPrintStopStart(self):
         expected_script = """\
 # Rollback information saved in {0}rollback-info_test
@@ -221,11 +273,12 @@ deploy {1} --runtime-name=abc.war --name=abc-v1.2.3 --server-groups=group
     @patch("os.path.isfile", MagicMock(return_value=True))
     @patch("deploy.common.read_archive_files",
            MagicMock(return_value=[
-            Deployment("abc-v1.2.3",
-                       "abc.war",
-                       path=current_dir + os.sep +
-                       "v1.2.3" + os.sep + "abc.war")
-                       ]))
+            Deployment({
+                "name": "abc-v1.2.3",
+                "runtime-name": "abc.war",
+                "enabled": False
+            }, None)
+    ]))
     def test_generate_deploy_script_noEnabledDeployments_DoNotPrintRollbackHeader(self):
         expected_script = """
 
@@ -251,11 +304,12 @@ deploy {1} --runtime-name=abc.war --name=abc-v1.2.3 --server-groups=group\
 
     @patch("deploy.common.read_archive_files",
            MagicMock(return_value=[
-            Deployment("system-v1.2.3",
-                       "system.war",
-                       path=current_dir + os.sep + "v1.2.3" + os.sep +
-                       "system.war")
-                    ]))
+            Deployment({
+                "name": "system-v1.2.3",
+                "runtime-name": "system.war",
+                "enabled": False
+            }, None)
+    ]))
     def test_generate_deploy_script_skip_local_undeploy(self):
         expected_script = """
 

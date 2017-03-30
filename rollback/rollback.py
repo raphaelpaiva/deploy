@@ -2,6 +2,7 @@ import os
 import glob
 
 from jbosscli import Deployment
+from jbosscli import ServerGroup
 import common
 import cli_output
 
@@ -45,10 +46,21 @@ def read_rollback_info(rollback_file_path):
     archives = []
     lines = common.read_from_file(rollback_file_path)
     for line in lines:
-        (name, runtime_name, server_group) = line.split()
+        (name, runtime_name, server_group_name) = line.split()
         archives.append(
-            Deployment(name, runtime_name, server_group=server_group)
-        )
+            Deployment({
+                "name": name,
+                "runtime-name": runtime_name,
+                "enabled": False
+            }, server_group=ServerGroup(
+                {
+                    "name": server_group_name,
+                    "profile": "",
+                    "socket-binding-group": "",
+                    "socket-binding-port-offset": "",
+                    "deployment": {}
+                })
+        ))
 
     return archives
 

@@ -7,8 +7,8 @@ from jbosscli import Deployment
 
 import verify_deployments
 
-deployment_app = Deployment("app-1.2.3", "app.war", enabled=True)
-deployment_ppa = Deployment("ppa-1.3.2", "ppa.war", enabled=True)
+deployment_app = Deployment({"name": "app-1.2.3", "runtime-name": "app.war", "enabled": True}, MagicMock(name="group"))
+deployment_ppa = Deployment({"name": "ppa-1.3.2", "runtime-name": "ppa.war", "enabled": True}, MagicMock(name="group"))
 
 
 class VerifyDeploymentsTests(unittest.TestCase):

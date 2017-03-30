@@ -81,13 +81,11 @@ def read_archive_files(path, tag, files=[]):
                 .replace(".war", "")\
                 .replace(".jar", "") + "-" + tag
 
-            enabled = False
-            deployment = Deployment(
-                name,
-                runtime_name,
-                enabled,
-                path=path + file
-            )
+            deployment = Deployment({
+                "name": name,
+                "runtime-name": runtime_name,
+                "enabled": False
+            }, None)
 
             archives.append(deployment)
 

@@ -27,8 +27,8 @@ def read_server_group_mapping(mapping_file):
             raw_mapping = line.strip().split("=")
             if len(raw_mapping) < 2:
                 continue
-            (runtime_name, server_group) = raw_mapping
-            mapping[runtime_name] = server_group
+            (runtime_name, server_group_name) = raw_mapping
+            mapping[runtime_name] = server_group_name
 
     return mapping
 
@@ -40,13 +40,19 @@ def map_server_groups(archives, mapping):
     for archive in archives:
         if archive.server_group is None and archive.runtime_name in mapping:
             archive.server_group = jbosscli.ServerGroup(
-                mapping[archive.runtime_name],
+                {
+                    "name": mapping[archive.runtime_name],
+                    "profile": "",
+                    "socket-binding-group": "",
+                    "socket-binding-port-offset": "",
+                    "deployment": {}
+                },
                 None
             )
 
 
 def generate_deploy_script(args, rollback_file_dir=None):
-    path = os.path.abspath(args.path) + os.sep
+    path = os.path.abspath(args.path)
     files_filter = args.files
     undeploy_pattern = args.undeploy_pattern
     skip_undeploy = True if undeploy_pattern else args.skip_undeploy
@@ -92,7 +98,7 @@ def generate_deploy_script(args, rollback_file_dir=None):
     else:
         undeploy_script = generate_undeploy_script(args, archives)
 
-    deploy_script = cli_output.generate_deploy_script(archives)
+    deploy_script = cli_output.generate_deploy_script(archives, path)
 
     if args.restart and controller and controller.domain:
         deploy_script += "\n:start-servers()"
@@ -121,7 +127,7 @@ def persist_rollback_info(deployments,
         line = deployment_line_template.format(
             deployment.name,
             deployment.runtime_name,
-            deployment.server_group
+            deployment.server_group.name
         )
         rollback_info += line
 

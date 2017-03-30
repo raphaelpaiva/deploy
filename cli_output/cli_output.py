@@ -1,12 +1,14 @@
 #!/usr/bin/python
 
+import os
 
-def prepare_deploy_statement(deployment):
+
+def prepare_deploy_statement(deployment, path=None):
     deployment_statement = "deploy {0} --runtime-name={1} --name={2}{3}"
     server_group_statement = "" if not deployment.server_group else \
-        " --server-groups={0}".format(deployment.server_group)
+        " --server-groups={0}".format(deployment.server_group.name)
 
-    deployment_path = deployment.path if deployment.path else ""
+    deployment_path = path + os.sep + deployment.runtime_name if path else ""
 
     return deployment_statement.format(
         deployment_path, deployment.runtime_name,
@@ -39,9 +41,9 @@ def generate_undeploy_script(archives, undeploy_tag=None):
     return script
 
 
-def generate_deploy_script(archives):
+def generate_deploy_script(archives, path=None):
     script = ""
     for archive in archives:
-        script = script + "\n" + prepare_deploy_statement(archive)
+        script = script + "\n" + prepare_deploy_statement(archive, path)
 
     return script

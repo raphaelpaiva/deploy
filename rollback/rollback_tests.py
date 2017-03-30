@@ -105,11 +105,11 @@ class TestRollback(unittest.TestCase):
         archive = archives[0]
         self.assertEqual(archive.name, "abc")
         self.assertEqual(archive.runtime_name, "abc.war")
-        self.assertEqual(archive.server_group, "group")
+        self.assertEqual(archive.server_group.name, "group")
 
     @patch("__main__.rollback.get_latest_rollback_file", MagicMock(return_value="rollback-info_test"))
     @patch("rollback.common.read_from_file", MagicMock(return_value=["abc-v1.2.3 abc.war group"]))
-    @patch("rollback.common.fetch_enabled_deployments", MagicMock(return_value=[Deployment("abc-v1.0.0", "abc.war", server_group="group")]))
+    @patch("rollback.common.fetch_enabled_deployments", MagicMock(return_value=[Deployment({"name": "abc-v1.0.0", "runtime-name": "abc.war", "enabled": True}, server_group=MagicMock(name="group"))]))
     @patch("rollback.common.initialize_controller", MagicMock())
     def test_generate_rollback_script(self):
         expected_script="""\
@@ -131,7 +131,7 @@ deploy  --runtime-name=abc.war --name=abc-v1.2.3 --server-groups=group\
         self.assertIsNone(rollback_file)
 
     @patch("rollback.common.read_from_file", MagicMock(return_value=["abc-v1.2.3 abc.war group"]))
-    @patch("rollback.common.fetch_enabled_deployments", MagicMock(return_value=[Deployment("abc-v1.0.0", "abc.war", server_group="group")]))
+    @patch("rollback.common.fetch_enabled_deployments", MagicMock(return_value=[Deployment({"name": "abc-v1.0.0", "runtime-name": "abc.war", "enabled": True}, server_group=MagicMock(name="group"))]))
     @patch("rollback.common.initialize_controller", MagicMock())
     @patch("rollback.glob.glob", MagicMock(return_value="rollback-info-suffix_1465588121140 rollback-info-suffix_1465588289292 rollback-info-suffix_1465588416224".split()))
     def test_generate_rollback_script_rollbackfile_suffix(self):

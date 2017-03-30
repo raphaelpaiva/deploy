@@ -55,18 +55,16 @@ class CommonTests(unittest.TestCase):
         self.assertIsNone(value)
         self.assertEquals(
             mock_stdout.getvalue(),
-            "Failed to parse: host:port\n"
+            "'Error requesting: Failed to parse: host:port code'\n"
         )
 
     def test_fetch_enabled_deployments_emptyArchives_ReturnEnabledDeployments(self):
         controller = MagicMock()
         archives = []
         controller_deployments = [
-            Deployment("name", "runtime_name",
-                       server_group="server_group", enabled=True),
-            Deployment("uname", "uruntime_name",
-                       server_group="server_group", enabled=False)
-            ]
+            Deployment({"name": "name", "runtime-name": "runtime_name", "enabled": True}, None),
+            Deployment({"name": "uname", "runtime-name": "uruntime_name", "enabled": False}, None)
+        ]
 
         controller.get_assigned_deployments = MagicMock(
             return_value=controller_deployments
@@ -80,14 +78,13 @@ class CommonTests(unittest.TestCase):
 
     def test_fetch_enabled_deployments_archivesContainsEnabledDeployment_UpdateArchives(self):
         controller = MagicMock()
-        archives = [Deployment("name", "runtime_name",
-                               server_group="server_group")]
+        archives = [
+            Deployment({"name": "name", "runtime-name": "runtime_name", "enabled": False}, None)
+        ]
 
         controller_deployments = [
-            Deployment("name", "runtime_name",
-                       server_group="server_group", enabled=True),
-            Deployment("uname", "uruntime_name",
-                       server_group="server_group", enabled=False)
+            Deployment({"name": "name", "runtime-name": "runtime_name", "enabled": True}, None),
+            Deployment({"name": "uname", "runtime-name": "uruntime_name", "enabled": False}, None)
         ]
 
         controller.get_assigned_deployments = MagicMock(

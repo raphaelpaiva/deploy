@@ -5,11 +5,12 @@ from mock import patch
 import cleanup
 from jbosscli import Deployment
 
-mock_deployments = [Deployment("dep-v1.2.3", "dep.war", enabled=True),
-                    Deployment("dep-v1.2.2", "dep.war", enabled=False),
-                    Deployment("dep-v1.2.1", "dep.war", enabled=False),
-                    Deployment("sys-v1.0.0", "sys.war", enabled=True)
-                    ]
+mock_deployments = [
+    Deployment({"name": "dep-v1.2.3", "runtime-name": "dep.war", "enabled": True}, None),
+    Deployment({"name": "dep-v1.2.2", "runtime-name": "dep.war", "enabled": False}, None),
+    Deployment({"name": "dep-v1.2.1", "runtime-name": "dep.war", "enabled": False}, None),
+    Deployment({"name": "sys-v1.0.0", "runtime-name": "sys.war", "enabled": True}, None)
+]
 
 
 class CleanupTests(unittest.TestCase):
@@ -31,10 +32,11 @@ class CleanupTests(unittest.TestCase):
                         msg="Expected dep-v1.2.1 not to be enabled")
 
     def test_map_deployments_by_runtime_name(self):
-        deployments = [Deployment("dep-v1.2.2", "dep.war"),
-                       Deployment("dep-v1.2.1", "dep.war"),
-                       Deployment("app-v1.0.1", "app.war")
-                       ]
+        deployments = [
+            Deployment({"name": "dep-v1.2.2", "runtime-name": "dep.war", "enabled": True}, None),
+            Deployment({"name": "dep-v1.2.1", "runtime-name": "dep.war", "enabled": True}, None),
+            Deployment({"name": "app-v1.0.1", "runtime-name": "app.war", "enabled": True}, None)
+        ]
 
         mapped = cleanup.map_deployments_by_runtime_name(deployments)
 
