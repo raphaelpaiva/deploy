@@ -7,6 +7,46 @@ import os
 
 import common
 from jbosscli import Deployment
+from jbosscli import ServerGroup
+from jbosscli import Host
+
+GROUP1_DATA = {
+    "name": "server_group1",
+    "profile": "profile",
+    "socket-binding-group": "bgroup",
+    "socket-binding-port-offset": 100,
+    "deployment": {
+        "deployment1-v2.41": {
+            "name": "deployment1-v2.41",
+            "runtime-name": "deployment1.war",
+            "enabled": True
+        },
+        "otherdeployment2-v3.21": {
+            "name": "otherdeployment2-v3.21",
+            "runtime-name": "otherdeployment2.war",
+            "enabled": False
+        }
+    }
+}
+
+GROUP2_DATA = {
+    "name": "server_group2",
+    "profile": "profile",
+    "socket-binding-group": "bgroup",
+    "socket-binding-port-offset": 100,
+    "deployment": {
+        "omg1-v2.41": {
+            "name": "omg1-v2.41",
+            "runtime-name": "omg1.war",
+            "enabled": True
+        },
+        "gmo2-v3.21": {
+            "name": "gmo2-v3.21",
+            "runtime-name": "gmo2.war",
+            "enabled": False
+        }
+    }
+}
 
 
 class CommonTests(unittest.TestCase):
@@ -58,45 +98,89 @@ class CommonTests(unittest.TestCase):
             "'Error requesting: Failed to parse: host:port code'\n"
         )
 
+    def test_get_assigned_deployments_domain_shouldReturnAllDeploymentsFromServerGroups(self):
+        controller = MagicMock(
+            domain=True,
+            server_groups=[]
+        )
+
+        controller.server_groups = [
+            ServerGroup(GROUP1_DATA, controller=controller),
+            ServerGroup(GROUP2_DATA, controller=controller)
+        ]
+
+        actual_deployments = common.get_assigned_deployments(controller)
+        self.assertEqual(len(actual_deployments), 4)
+
+    def test_get_assigned_deployments_standalone_shouldReturnDeploymentsFromHost(self):
+        controller = MagicMock(
+            domain=False,
+        )
+
+        host_data = {
+            "name": "host",
+            "product-name": "",
+            "product-version": "",
+            "release-codename": "",
+            "release-version": "",
+            "master": True,
+            "deployment": {
+                "omg1-v2.41": {
+                    "name": "omg1-v2.41",
+                    "runtime-name": "omg1.war",
+                    "enabled": True
+                },
+                "gmo2-v3.21": {
+                    "name": "gmo2-v3.21",
+                    "runtime-name": "gmo2.war",
+                    "enabled": False
+                }
+            }
+        }
+
+        controller.hosts = [Host(host_data, controller=controller)]
+
+        actual_deployments = common.get_assigned_deployments(controller)
+        self.assertEqual(len(actual_deployments), 2)
+
     def test_fetch_enabled_deployments_emptyArchives_ReturnEnabledDeployments(self):
-        controller = MagicMock()
         archives = []
-        controller_deployments = [
-            Deployment({"name": "name", "runtime-name": "runtime_name", "enabled": True}, None),
-            Deployment({"name": "uname", "runtime-name": "uruntime_name", "enabled": False}, None)
-        ]
-
-        controller.get_assigned_deployments = MagicMock(
-            return_value=controller_deployments
+        controller = MagicMock(
+            domain=True,
+            server_groups=[]
         )
 
-        enabled_deployments = common.fetch_enabled_deployments(
-            controller, archives)
-
-        self.assertEquals(len(enabled_deployments), 1)
-        self.assertEquals(enabled_deployments[0].name, "name")
-
-    def test_fetch_enabled_deployments_archivesContainsEnabledDeployment_UpdateArchives(self):
-        controller = MagicMock()
-        archives = [
-            Deployment({"name": "name", "runtime-name": "runtime_name", "enabled": False}, None)
+        controller.server_groups = [
+            ServerGroup(GROUP1_DATA, controller=controller)
         ]
-
-        controller_deployments = [
-            Deployment({"name": "name", "runtime-name": "runtime_name", "enabled": True}, None),
-            Deployment({"name": "uname", "runtime-name": "uruntime_name", "enabled": False}, None)
-        ]
-
-        controller.get_assigned_deployments = MagicMock(
-            return_value=controller_deployments
-        )
 
         enabled_deployments = common.fetch_enabled_deployments(
             controller, archives
         )
 
         self.assertEquals(len(enabled_deployments), 1)
-        self.assertEquals(enabled_deployments[0].name, "name")
+        self.assertEquals(enabled_deployments[0].name, "deployment1-v2.41")
+
+    def test_fetch_enabled_deployments_archivesContainsEnabledDeployment_UpdateArchives(self):
+        controller = MagicMock(
+            domain=True,
+            server_groups=[]
+        )
+
+        controller.server_groups = [
+            ServerGroup(GROUP2_DATA, controller=controller)
+        ]
+
+        archives = [
+            Deployment({"name": "omg1-v2.41", "runtime-name": "omg1.war", "enabled": False}, None)
+        ]
+
+        enabled_deployments = common.fetch_enabled_deployments(
+            controller, archives
+        )
+
+        self.assertEquals(len(enabled_deployments), 1)
+        self.assertEquals(enabled_deployments[0].name, "omg1-v2.41")
         self.assertEquals(enabled_deployments[0].enabled, True)
 
     @patch("os.listdir",
