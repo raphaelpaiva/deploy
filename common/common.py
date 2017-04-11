@@ -27,7 +27,7 @@ def fetch_enabled_deployments(controller, archives=[]):
 
     It is mainly used to provide information to the undeploy script generation.
     """
-    deployments = controller.get_assigned_deployments()
+    deployments = get_assigned_deployments(controller)
 
     if not archives:
         return [x for x in deployments if x.enabled]
@@ -45,6 +45,18 @@ def fetch_enabled_deployments(controller, archives=[]):
                 deployment.server_group
 
     return enabled_deployments
+
+def get_assigned_deployments(controller):
+    deployments = []
+    if controller.domain:
+        map(
+            lambda d: deployments.extend(d),
+            [group.deployments for group in controller.server_groups]
+        )
+    else:
+        deployments = controller.hosts[0].deployments
+
+    return deployments
 
 
 def write_to_file(file, content):  # pragma: no cover
