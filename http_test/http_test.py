@@ -1,4 +1,5 @@
 import requests
+import common
 
 import jbosscli
 
@@ -12,7 +13,7 @@ def generate_test_list(args):
     base_url = args.base_url if args.base_url \
         else args.controller.split(":")[0]
 
-    assigned_deployments = controller.get_assigned_deployments()
+    assigned_deployments = common.get_assigned_deployments(controller)
 
     modules = [x for x in assigned_deployments if x.enabled and
                ".jar" not in x.runtime_name]
@@ -20,12 +21,15 @@ def generate_test_list(args):
     error_modules = []
 
     for module in modules:
-        app = controller.fecth_context_root(module)
+        app = module.get_context_root()
         url = "http://{0}{1}".format(base_url, app)
-        r = requests.get(url)
+        try:
+            r = requests.get(url)
 
-        if r.status_code >= 400:
-            error_modules.append(url + " " + str(r.status_code))
+            if r.status_code >= 400:
+                error_modules.append(url + " " + str(r.status_code))
+        except requests.ConnectionError as e:
+            error_modules.append(url + " " + str(e))
 
     output = ""
     return_code = None
