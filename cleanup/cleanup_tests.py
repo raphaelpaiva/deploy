@@ -15,10 +15,9 @@ mock_deployments = [
 
 class CleanupTests(unittest.TestCase):
 
+    @patch("cleanup.common.get_assigned_deployments", MagicMock(return_value=mock_deployments))
     def test_fetch_not_enabled_deployments(self):
         cli_mock = MagicMock()
-
-        cli_mock.get_deployments = MagicMock(return_value=mock_deployments)
 
         not_enabled = cleanup.fetch_not_enabled_deployments(cli_mock)
 
@@ -57,11 +56,10 @@ class CleanupTests(unittest.TestCase):
                         msg="Expected dep-v1.2.1 to be mapped to dep.war")
 
     @patch("cleanup.common.initialize_controller")
+    @patch("cleanup.common.get_assigned_deployments", MagicMock(return_value=mock_deployments))
     def test_generate_cleanup_script_notDomain_shouldNotPrintAllRelevantServerGroups(self, init_mock):
         cli_mock = MagicMock()
         cli_mock.domain = False
-
-        cli_mock.get_deployments = MagicMock(return_value=mock_deployments)
 
         init_mock.return_value = cli_mock
         args = MagicMock()
@@ -79,11 +77,10 @@ undeploy dep-v1.2.1\
         self.assertEqual(script, expected_script)
 
     @patch("cleanup.common.initialize_controller")
+    @patch("cleanup.common.get_assigned_deployments", MagicMock(return_value=mock_deployments))
     def test_generate_cleanup_script_Domain_shouldPrintAllRelevantServerGroups(self, init_mock):
         cli_mock = MagicMock()
         cli_mock.domain = True
-
-        cli_mock.get_deployments = MagicMock(return_value=mock_deployments)
 
         init_mock.return_value = cli_mock
         args = MagicMock()
@@ -101,11 +98,10 @@ undeploy dep-v1.2.1 --all-relevant-server-groups\
         self.assertEqual(script, expected_script)
 
     @patch("cleanup.common.initialize_controller")
+    @patch("cleanup.common.get_assigned_deployments", MagicMock(return_value=mock_deployments))
     def test_generate_cleanup_script_numDeploymentsToKeepGreaterThanDeployments_shouldNotPrintScript(self, init_mock):
         cli_mock = MagicMock()
         cli_mock.domain = True
-
-        cli_mock.get_deployments = MagicMock(return_value=mock_deployments)
 
         init_mock.return_value = cli_mock
         args = MagicMock()

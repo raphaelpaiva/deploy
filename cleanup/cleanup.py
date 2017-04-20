@@ -64,7 +64,7 @@ def fetch_not_enabled_deployments(controller):
     """Filter deployments that are not enabled from all deployments in
     the controller.
     """
-    all_deployments = controller.get_deployments()
+    all_deployments = common.get_assigned_deployments(controller)
 
     not_enabled = [x for x in all_deployments if not x.enabled]
 
