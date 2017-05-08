@@ -127,7 +127,7 @@ def persist_rollback_info(deployments,
         line = deployment_line_template.format(
             deployment.name,
             deployment.runtime_name,
-            deployment.server_group.name
+            deployment.server_group.name if deployment.server_group is not None else None
         )
         rollback_info += line
 

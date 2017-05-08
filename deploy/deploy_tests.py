@@ -147,6 +147,34 @@ class TestDeploy(unittest.TestCase):
             "abc abc.war group\ncba-v5.2.0 cba.war pourg\n"
         )
 
+    @patch("deploy.common.write_to_file", MagicMock())
+    def test_persist_rollback_info_twoDeployments_standalone_shouldNotWriteServerGroups(self):
+        deployments = [
+            Deployment(
+                {
+                    "name": "abc",
+                    "runtime-name": "abc.war",
+                    "enabled": True
+                },
+                server_group=None
+            ),
+            Deployment(
+                {
+                    "name": "cba-v5.2.0",
+                    "runtime-name": "cba.war",
+                    "enabled": True
+                },
+                server_group=None
+            )
+        ]
+
+        deploy.persist_rollback_info(deployments)
+
+        deploy.common.write_to_file.assert_called_with(
+            ANY,
+            "abc abc.war None\ncba-v5.2.0 cba.war None\n"
+        )
+
     @patch("deploy.os.path.isfile", MagicMock(return_value=True))
     @patch("deploy.common.read_from_file", MagicMock(return_value=["abc.war=group"]))
     def test_read_server_group_mapping_OneMapping_ShouldReturnValidMap(self):
