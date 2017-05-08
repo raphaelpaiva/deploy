@@ -47,19 +47,24 @@ def read_rollback_info(rollback_file_path):
     lines = common.read_from_file(rollback_file_path)
     for line in lines:
         (name, runtime_name, server_group_name) = line.split()
-        archives.append(
-            Deployment({
-                "name": name,
-                "runtime-name": runtime_name,
-                "enabled": False
-            }, server_group=ServerGroup(
-                {
+        
+        server_group = None
+
+        if server_group_name != "None":
+            server_group = ServerGroup({
                     "name": server_group_name,
                     "profile": "",
                     "socket-binding-group": "",
                     "socket-binding-port-offset": "",
                     "deployment": {}
                 })
+        
+        archives.append(
+            Deployment({
+                "name": name,
+                "runtime-name": runtime_name,
+                "enabled": False
+            }, server_group=server_group
         ))
 
     return archives

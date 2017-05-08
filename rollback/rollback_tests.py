@@ -107,6 +107,23 @@ class TestRollback(unittest.TestCase):
         self.assertEqual(archive.runtime_name, "abc.war")
         self.assertEqual(archive.server_group.name, "group")
 
+    @patch("rollback.common.read_from_file",
+           MagicMock(return_value=["abc abc.war None"]))
+    def test_read_rollback_info(self):
+        rollback_file_path = os.path.dirname(os.path.abspath(__file__))\
+            + os.sep + "rollback-info_test"
+
+        archives = []
+        archives = rollback.read_rollback_info(rollback_file_path)
+
+        rollback.common.read_from_file.assert_called_with(rollback_file_path)
+        self.assertEqual(len(archives), 1)
+
+        archive = archives[0]
+        self.assertEqual(archive.name, "abc")
+        self.assertEqual(archive.runtime_name, "abc.war")
+        self.assertEqual(archive.server_group, None)
+
     @patch("__main__.rollback.get_latest_rollback_file", MagicMock(return_value="rollback-info_test"))
     @patch("rollback.common.read_from_file", MagicMock(return_value=["abc-v1.2.3 abc.war group"]))
     @patch("rollback.common.fetch_enabled_deployments", MagicMock(return_value=[Deployment({"name": "abc-v1.0.0", "runtime-name": "abc.war", "enabled": True}, server_group=MagicMock(name="group"))]))
