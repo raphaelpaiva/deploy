@@ -3,6 +3,10 @@ import common
 
 import jbosscli
 
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
+
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+
 OK_RET_CODE = 0
 ERROR_RET_CODE = 1
 
@@ -24,7 +28,7 @@ def generate_test_list(args):
         app = module.get_context_root()
         url = "http://{0}{1}".format(base_url, app)
         try:
-            r = requests.get(url)
+            r = requests.get(url, verify=False)
 
             if r.status_code >= 400:
                 error_modules.append(url + " " + str(r.status_code))
