@@ -54,7 +54,7 @@ def get_assigned_deployments(controller):
             [group.deployments for group in controller.server_groups]
         )
     else:
-        deployments = controller.hosts[0].deployments
+        deployments = controller.deployments
 
     return deployments
 
