@@ -60,12 +60,18 @@ def map_deployments_by_runtime_name(deployments):
     return deployments_by_runtime_name
 
 
-def fetch_not_enabled_deployments(controller):
+def fetch_not_enabled_deployments(cli):
     """Filter deployments that are not enabled from all deployments in
     the controller.
     """
-    all_deployments = common.get_assigned_deployments(controller)
+    all_deployments = set(cli.deployments)
 
-    not_enabled = [x for x in all_deployments if not x.enabled]
+    if cli.domain:
+        assigned_deployments = set()
+        map(assigned_deployments.update, [g.deployments for g in cli.server_groups])
+        enabled_deployments = frozenset([d for d in assigned_deployments if d.enabled])
 
-    return not_enabled
+        return all_deployments - enabled_deployments
+    else:
+        return filter(lambda d: not d.enabled, all_deployments)
+
