@@ -9,6 +9,7 @@ import common
 from jbosscli import Deployment
 from jbosscli import ServerGroup
 from jbosscli import Host
+from jbosscli import Jbosscli
 
 GROUP1_DATA = {
     "name": "server_group1",
@@ -117,7 +118,7 @@ class CommonTests(unittest.TestCase):
             domain=False,
         )
 
-        host_data = {
+        cli_data = {
             "name": "host",
             "product-name": "",
             "product-version": "",
@@ -138,7 +139,10 @@ class CommonTests(unittest.TestCase):
             }
         }
 
-        controller.hosts = [Host(host_data, controller=controller)]
+        controller.deployments = [
+            Deployment({"name": "omg1-v2.41", "runtime-name": "omg1.war", "enabled": True}, None),
+            Deployment({"name": "gmo2-v3.21", "runtime-name": "gmo2.war", "enabled": False}, None)
+        ]
 
         actual_deployments = common.get_assigned_deployments(controller)
         self.assertEqual(len(actual_deployments), 2)

@@ -18,6 +18,7 @@ class CleanupTests(unittest.TestCase):
     @patch("cleanup.common.get_assigned_deployments", MagicMock(return_value=mock_deployments))
     def test_fetch_not_enabled_deployments(self):
         cli_mock = MagicMock()
+        cli_mock.deployments = mock_deployments
 
         not_enabled = cleanup.fetch_not_enabled_deployments(cli_mock)
 
@@ -60,6 +61,7 @@ class CleanupTests(unittest.TestCase):
     def test_generate_cleanup_script_notDomain_shouldNotPrintAllRelevantServerGroups(self, init_mock):
         cli_mock = MagicMock()
         cli_mock.domain = False
+        cli_mock.deployments = mock_deployments
 
         init_mock.return_value = cli_mock
         args = MagicMock()
@@ -81,6 +83,7 @@ undeploy dep-v1.2.1\
     def test_generate_cleanup_script_Domain_shouldPrintAllRelevantServerGroups(self, init_mock):
         cli_mock = MagicMock()
         cli_mock.domain = True
+        cli_mock.deployments = mock_deployments
 
         init_mock.return_value = cli_mock
         args = MagicMock()
@@ -102,6 +105,7 @@ undeploy dep-v1.2.1 --all-relevant-server-groups\
     def test_generate_cleanup_script_numDeploymentsToKeepGreaterThanDeployments_shouldNotPrintScript(self, init_mock):
         cli_mock = MagicMock()
         cli_mock.domain = True
+        cli_mock.deployments = mock_deployments
 
         init_mock.return_value = cli_mock
         args = MagicMock()
