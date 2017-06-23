@@ -67,8 +67,7 @@ def fetch_not_enabled_deployments(cli):
     all_deployments = set(cli.deployments)
 
     if cli.domain:
-        assigned_deployments = set()
-        map(assigned_deployments.update, [g.deployments for g in cli.server_groups])
+        assigned_deployments = set(common.get_assigned_deployments(cli))
         enabled_deployments = frozenset([d for d in assigned_deployments if d.enabled])
 
         return all_deployments - enabled_deployments
